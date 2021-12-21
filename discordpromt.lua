@@ -1,5 +1,5 @@
-local Join = loadstring(game:HttpGet"https://ataias.xyz/discord.lua")() 
-local Code = game:HttpGet("https://ataias.xyz/discordCode")
+local Join = loadstring(game:HttpGet"https://raw.githubusercontent.com/Voxel0/scripts/main/discord.lua")() 
+local Code = game:HttpGet("https://raw.githubusercontent.com/Voxel0/scripts/main/discordcode")
 local GUI = game:GetService("StarterGui")
 local cb = Instance.new("BindableFunction")
 cb.OnInvoke = function(res)
