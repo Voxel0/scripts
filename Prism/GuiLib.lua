@@ -159,7 +159,7 @@ function DarkLib:Window()
 	Title.Position = UDim2.new(0.42778793, 0, 0.041837737, 0)
 	Title.Size = UDim2.new(0, 78, 0, 30)
 	Title.Font = Enum.Font.Gotham
-	Title.Text = "Prism"
+	Title.Text = "Prism v0.0.1"
 	Title.TextColor3 = Color3.fromRGB(168, 168, 168)
 	Title.TextSize = 20.000
 
