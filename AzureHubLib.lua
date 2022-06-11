@@ -46,7 +46,7 @@ function library.initiate(setting)
 	local main = {}
 
 	main.screengui = library.create("ScreenGui" ,{
-		Name = "Azure",
+		Name = "Prism",
 		ZIndexBehavior = Enum.ZIndexBehavior.Global,
 		ResetOnSpawn = false,
 	})
