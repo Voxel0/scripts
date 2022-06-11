@@ -199,7 +199,7 @@ function library.initiate(setting)
 		AnchorPoint = Vector2.new(0,0),
 		Position = UDim2.new(0.367, 0,0.303, 0),
 		Image = "rbxassetid://3570695787",
-		ImageColor3 = Themes.Background,
+		ImageColor3 = Themes.BackgroundColor,
 		ScaleType = Enum.ScaleType.Slice,
 		SliceCenter = Rect.new(100, 100, 100, 100),
 		SliceScale = 0.060,
