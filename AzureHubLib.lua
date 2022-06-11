@@ -1172,26 +1172,7 @@ function library.initiate(setting)
 					ts:create(sliders.circle, TweenInfo.new(0.05), {Position = UDim2.new(scale, -7, 0, -3)}):Play()
 				end
 
-				local precise = (min%1 > 0)
-				sliders.slider.MouseButton1Down:Connect(function()
-					ts:create(sliders.circletransparency, TweenInfo.new(0.1), {ImageTransparency = 0.7}):Play()
-
-					connection = rs.Heartbeat:Connect(function()
-						local scale = math.clamp(mouse.X - sliders.slider.AbsolutePosition.X, 0, sliders.slider.AbsoluteSize.X) / sliders.slider.AbsoluteSize.X
-						if precise then
-							Value = string.format("%.1f", min + ((max - min) * scale))
-						else
-							Value = math.floor(min + ((max - min) * scale))
-						end
-						sliders.value.Text = tostring(Value)
-
-						if callback then
-							callback(Value)
-						end
-
-						ts:Create(sliders.inner, TweenInfo.new(0.05), {Size = UDim2.new(scale, 0, 0, 6)}):Play()
-						ts:create(sliders.circle, TweenInfo.new(0.05), {Position = UDim2.new(scale, -8, 0, -3)}):Play()
-					end)
+				
 
 					uis.InputEnded:Connect(function(Check)
 						if Check.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -1203,7 +1184,7 @@ function library.initiate(setting)
 						end
 					end)
 
-				end)
+				
 
 				sections.section.Size = sections.section.Size + UDim2.new(0, 0, 0, 58)
 				category.categoryscrolling.CanvasSize = category.categoryscrolling.CanvasSize + UDim2.new(0, 0, 0, 58)
