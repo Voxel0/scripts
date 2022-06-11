@@ -35,8 +35,8 @@ end
 
 function library.initiate(setting)
 
-	if game:GetService("CoreGui"):FindFirstChild("Azure") then
-		game:GetService("CoreGui").Azure:Destroy()
+	if game:GetService("CoreGui"):FindFirstChild("Prism") then
+		game:GetService("CoreGui").Prism:Destroy()
 	end
 
 	local firstcategory = true
