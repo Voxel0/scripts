@@ -46,7 +46,7 @@ function library.initiate(setting)
 	local main = {}
 
 	main.screengui = library.create("ScreenGui" ,{
-		Name = "Azure",
+		Name = "Prism",
 		ZIndexBehavior = Enum.ZIndexBehavior.Global,
 		ResetOnSpawn = false,
 	})
@@ -289,7 +289,7 @@ function library.initiate(setting)
 		Position = UDim2.new(0, 8, 0, 0),
 		Size = UDim2.new(0, 200, 0, 38),
 		Font = Enum.Font.GothamBold,
-		Text = "Azure",
+		Text = "Prism",
 		TextColor3 = Themes.TextColor,
 		TextSize = 20.000,
 		TextXAlignment = Enum.TextXAlignment.Left,
