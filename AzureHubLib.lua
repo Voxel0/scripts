@@ -35,8 +35,8 @@ end
 
 function library.initiate(setting)
 
-	if game:GetService("CoreGui"):FindFirstChild("Azure") then
-		game:GetService("CoreGui").Azure:Destroy()
+	if game:GetService("CoreGui"):FindFirstChild("Prism") then
+		game:GetService("CoreGui").Prism:Destroy()
 	end
 
 	local firstcategory = true
@@ -199,7 +199,7 @@ function library.initiate(setting)
 		AnchorPoint = Vector2.new(0,0),
 		Position = UDim2.new(0.367, 0,0.303, 0),
 		Image = "rbxassetid://3570695787",
-		ImageColor3 = Themes.Background,
+		ImageColor3 = Themes.BackgroundColor,
 		ScaleType = Enum.ScaleType.Slice,
 		SliceCenter = Rect.new(100, 100, 100, 100),
 		SliceScale = 0.060,
@@ -289,7 +289,7 @@ function library.initiate(setting)
 		Position = UDim2.new(0, 8, 0, 0),
 		Size = UDim2.new(0, 200, 0, 38),
 		Font = Enum.Font.GothamBold,
-		Text = "Azure",
+		Text = "Prism",
 		TextColor3 = Themes.TextColor,
 		TextSize = 20.000,
 		TextXAlignment = Enum.TextXAlignment.Left,
@@ -1465,7 +1465,7 @@ function library.initiate(setting)
 				end)
 
 				checkconnection = game:GetService("CoreGui").ChildRemoved:Connect(function(child)
-					if child.Name == "Azure" then 
+					if child.Name == "Prism" then 
 						if inputconnection then
 							inputconnection:Disconnect()
 							inputconnection = nil
