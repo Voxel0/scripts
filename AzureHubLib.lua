@@ -1172,7 +1172,7 @@ function library.initiate(setting)
 					ts:create(sliders.circle, TweenInfo.new(0.05), {Position = UDim2.new(scale, -7, 0, -3)}):Play()
 				end
 
-				local precise = false
+				local precise = (min%1 > 0)
 				sliders.slider.MouseButton1Down:Connect(function()
 					ts:create(sliders.circletransparency, TweenInfo.new(0.1), {ImageTransparency = 0.7}):Play()
 
