@@ -6,7 +6,7 @@ end)
 setreadonly(syn,false)
 local req = syn.request
 syn.request = function(args)
-  if args.Url == 'https://darkhub-v4.maxt.church/checkKey' then 
+  if args.Url == 'https://api.darkhub.cloud/v3/roblox/checkKey' then 
     return {
       Body = 'OK'
     }
