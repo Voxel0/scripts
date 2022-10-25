@@ -1,9 +1,9 @@
 param
 (
-    [Parameter(HelpMessage = 'Remove podcasts from homepage.')]
+    [Parameter(HelpMessage = 'Remove podcasts/episodes/audiobooks from homepage.')]
     [switch]$podcasts_off,
     
-    [Parameter(HelpMessage = 'Do not remove podcasts from homepage.')]
+    [Parameter(HelpMessage = 'Do not remove podcasts/episodes/audiobooks from homepage.')]
     [switch]$podcasts_on,
     
     [Parameter(HelpMessage = 'Block Spotify automatic updates.')]
@@ -45,7 +45,7 @@ param
     [Parameter(HelpMessage = 'Do not hide the icon of collaborations in playlists.')]
     [switch]$hide_col_icon_off,
     
-    [Parameter(HelpMessage = 'Do not enable the made for you button on the left sidebar.')]
+    [Parameter(HelpMessage = 'Do not enable the Made For You button on the left sidebar.')]
     [switch]$made_for_you_off,
     
     [Parameter(HelpMessage = 'Do not enable enhance playlist.')]
@@ -66,8 +66,8 @@ param
     [Parameter(HelpMessage = 'Enable audio equalizer for Desktop.')]
     [switch]$equalizer_off,
     
-    [Parameter(HelpMessage = 'Enable showing a new and improved device picker UI.')]
-    [switch]$device_new_off,
+    [Parameter(HelpMessage = 'Return the old device picker')]
+    [switch]$device_picker_old,
 
     [Parameter(HelpMessage = 'Disable the new home structure and navigation.')]
     [switch]$navalt_off,
@@ -80,6 +80,9 @@ param
     
     [Parameter(HelpMessage = 'Use bts patch.')]
     [switch]$bts,
+
+    [Parameter(HelpMessage = 'Static color for lyrics.')]
+    [int16]$lyrics_stat,
 
     [Parameter(HelpMessage = 'Error log ru string.')]
     [switch]$err_ru,
@@ -104,7 +107,7 @@ function Format-LanguageCode {
     
     begin {
         $supportLanguages = @(
-            'en', 'ru', 'it', 'tr', 'ka', 'pl', 'es', 'fr', 'hi', 'pt', 'id', 'vi'
+            'en', 'ru', 'it', 'tr', 'ka', 'pl', 'es', 'fr', 'hi', 'pt', 'id', 'vi', 'ro', 'de', 'hu', 'zh'
         )
     }
     
@@ -157,6 +160,22 @@ function Format-LanguageCode {
             }
             '^vi' {
                 $returnCode = 'vi'
+                break
+            }
+            '^ro' {
+                $returnCode = 'ro'
+                break
+            }
+            '^de' {
+                $returnCode = 'de'
+                break
+            }
+            '^hu' {
+                $returnCode = 'hu'
+                break
+            }
+            '^zh' {
+                $returnCode = 'zh'
                 break
             }
             Default {
@@ -245,6 +264,22 @@ function Set-ScriptLanguageStrings($LanguageCode) {
             $langStrings = CallLang -clg "vi"
             break
         }
+        'ro' {
+            $langStrings = CallLang -clg "ro"
+            break
+        }
+        'de' {
+            $langStrings = CallLang -clg "de"
+            break
+        }
+        'hu' {
+            $langStrings = CallLang -clg "hu"
+            break
+        }
+        'zh' {
+            $langStrings = CallLang -clg "zh"
+            break
+        }
         Default {
             # Default to English if unable to find a match.
             $langStrings = CallLang -clg "en"
@@ -264,8 +299,8 @@ $lang = Set-ScriptLanguageStrings -LanguageCode $langCode
 
 # Set variable 'ru'.
 if ($langCode -eq 'ru') { $ru = $true }
-# Set variable 'add transl line'.
-if ($langCode -match '^(it|tr|ka|pl|es|fr|hi|pt|id|vi)') { $line = $true }
+# Set variable 'add translation line'.
+if ($langCode -match '^(it|tr|ka|pl|es|fr|hi|pt|id|vi|ro|de|hu|zh)') { $line = $true }
 
 # Automatic length of stars
 $au = ($lang).Author.Length + ($lang).Author2.Length
@@ -326,10 +361,10 @@ function incorrectValue {
 
 function Check_verison_clients($param2) {
 
-    # checking the recommended version for spotx
+    # Checking the recommended version for spotx
     if ($param2 -eq "online") {
         $ProgressPreference = 'SilentlyContinue' # Hiding Progress Bars
-        $readme = Invoke-WebRequest -UseBasicParsing -Uri https://raw.githubusercontent.com/amd64fox/SpotX/main/README.md
+        $readme = Invoke-WebRequest -UseBasicParsing -Uri https://raw.githubusercontent.com/SpotX-CLI/SpotX-Win/main/README.md
         $v = $readme.RawContent | Select-String "Recommended official version \[\d+\.\d+\.\d+\.\d+\]" -AllMatches
         $ver = $v.Matches.Value
         $ver = $ver -replace 'Recommended official version \[(\d+\.\d+\.\d+\.\d+)\]', '$1'
@@ -376,19 +411,19 @@ function downloadScripts($param1) {
         $ver = Check_verison_clients -param2 "online"
         $l = "$PWD\links.tsv"
         $old = [IO.File]::ReadAllText($l)
-        $links = $old -match "https:\/\/upgrade.scdn.co\/upgrade\/client\/win32-x86\/spotify_installer-$ver\.g[0-9a-f]{8}-[0-9]{1,3}\.exe" 
+        $links = $old -match "https:\/\/upgrade.scdn.co\/upgrade\/client\/win32-x86\/spotify_installer-$ver\.g[0-9a-f]{8}-[0-9]{1,4}\.exe" 
         $links = $Matches.Values
     }
     if ($ru -and $param1 -eq "cache-spotify") {
-        $links2 = "https://raw.githubusercontent.com/amd64fox/SpotX/main/scripts/cache/cache_spotify_ru.ps1"
+        $links2 = "https://raw.githubusercontent.com/SpotX-CLI/SpotX-Win/main/scripts/cache/cache_spotify_ru.ps1"
     }
     if (!($ru) -and $param1 -eq "cache-spotify" ) { 
-        $links2 = "https://raw.githubusercontent.com/amd64fox/SpotX/main/scripts/cache/cache_spotify.ps1"
+        $links2 = "https://raw.githubusercontent.com/SpotX-CLI/SpotX-Win/main/scripts/cache/cache_spotify.ps1"
     }
     
     $web_Url_prev = "https://github.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip", $links, `
-        $links2, "https://raw.githubusercontent.com/amd64fox/SpotX/main/scripts/cache/hide_window.vbs", `
-        "https://raw.githubusercontent.com/amd64fox/SpotX/main/scripts/cache/run_ps.bat", "https://docs.google.com/spreadsheets/d/e/2PACX-1vSFN2hWu4UO-ZWyVe8wlP9c0JsrduA49xBnRmSLOt8SWaOfIpCwjDLKXMTWJQ5aKj3WakQv6-Hnv9rz/pub?gid=0&single=true&output=tsv"
+        $links2, "https://raw.githubusercontent.com/SpotX-CLI/SpotX-Win/main/scripts/cache/hide_window.vbs", `
+        "https://raw.githubusercontent.com/SpotX-CLI/SpotX-Win/main/scripts/cache/run_ps.bat", "https://docs.google.com/spreadsheets/d/e/2PACX-1vSFN2hWu4UO-ZWyVe8wlP9c0JsrduA49xBnRmSLOt8SWaOfIpCwjDLKXMTWJQ5aKj3WakQv6-Hnv9rz/pub?gid=0&single=true&output=tsv"
 
     $local_Url_prev = "$PWD\chrome_elf.zip", "$PWD\SpotifySetup.exe", "$cache_folder\cache_spotify.ps1", "$cache_folder\hide_window.vbs", "$cache_folder\run_ps.bat", "$PWD\links.tsv"
     $web_name_file_prev = "chrome_elf.zip", "SpotifySetup.exe", "cache_spotify.ps1", "hide_window.vbs", "run_ps.bat", "links.tsv"
@@ -885,10 +920,51 @@ function Helper($paramname, $addstring) {
             $contents = $html_lic_min
             $paramdata = $xpuiContents_html
         }
+        "Lyrics-color" { 
+            # Static color for lyrics (xpui-routes-lyrics.css)
+
+            $pasttext = "#ffffff4a", "#ffffffb8", "#ffffff6b", "#E40909B3"
+            $current = "#ffffffc7", "#ffffffc7", "#ffffffc7", "#C2C2C2"
+            $next = "#ffffff4a", "#322319", "#2e080b", "#CA861A"
+            $hover = "#ffffffc7", "#ffffffc7", "#ffffffc7", "#0FD40F"
+            $background = "#121212", "#956b4b", "#c62736f2", "#121212"
+            $maxmatch = "#ffffff94", "#322319", "#2e080b", "#C2C2C2"
+
+            switch ($lyrics_stat) {
+                1 { 
+                    $pasttextR = $pasttext[0]; $currentR = $current[0]; $nextR = $next[0]; $hoverR = $hover[0]; $backgroundR = $background[0]; $maxmatchR = $maxmatch[0]
+                }
+                2 { 
+                    $pasttextR = $pasttext[1]; $currentR = $current[1]; $nextR = $next[1]; $hoverR = $hover[1]; $backgroundR = $background[1]; $maxmatchR = $maxmatch[1]
+                }
+                3 { 
+                    $pasttextR = $pasttext[2]; $currentR = $current[2]; $nextR = $next[2]; $hoverR = $hover[2]; $backgroundR = $background[2]; $maxmatchR = $maxmatch[2]
+                }
+                4 { 
+                    $pasttextR = $pasttext[3]; $currentR = $current[3]; $nextR = $next[3]; $hoverR = $hover[3]; $backgroundR = $background[3]; $maxmatchR = $maxmatch[3]
+                }
+                Default {
+                    $pasttextR = $pasttext[0]; $currentR = $current[0]; $nextR = $next[0]; $hoverR = $hover[0]; $backgroundR = $background[0]; $maxmatchR = $maxmatch[0]
+                }
+
+            }
+            $lyrics = @{
+                pasttext   = '(H2J92dVdr0ykdOX5azL1{color:)var\(--lyrics-color-active\)', "`$1$pasttextR"
+                current    = '((TDPh45khCfG51fNwNIiw|E64X_eoy6xsJmDdKKHja){color:)var\(--lyrics-color-active\)', "`$1$currentR"
+                next       = '(NHVfxGs2HwmI_fly2JC4{color:)var\(--lyrics-color-inactive\)' , "`$1$nextR"
+                hover      = '(NHVfxGs2HwmI_fly2JC4:hover{color:)var\(--lyrics-color-active\)' , "`$1$hoverR"
+                background = 'var\(--lyrics-color-background\)', $backgroundR
+                maxmatch   = '(iq4cgi0YEKr6DGaTtzUj{color:)var\(--lyrics-color-inactive\)', "`$1$maxmatchR"
+            }
+            $n = ($lang).NoVariable6
+            $contents = $lyrics
+            $paramdata = $xpui_lyrics
+
+        }
         "Discriptions" {  
             # Add discriptions (xpui-desktop-modals.js)
             $discript = @{
-                Log = '((..createElement|children:\(.{1,7}\))\(....,{source:).....get\("about.copyright",.\),paragraphClassName:.}\)', "`$1`"<h3>More about SpotX</h3><a href=`'https://github.com/amd64fox/SpotX`'>Github</a><br/><a href=`'https://telegra.ph/SpotX-FAQ-09-19`'>FAQ</a><br/><a href=`'https://t.me/spotify_windows_mod`'>Telegram channel</a><br/><a href=`'https://github.com/amd64fox/SpotX/issues/new?assignees=&labels=%E2%9D%8C+bug&template=bug_report.yml`'>Create an issue report</a><br> <br/><h4>DISCLAIMER</h4>SpotX is a modified version of the official Spotify client, provided as an evaluation version, you use it at your own risk.`"})"
+                Log = '((..createElement|children:\(.{1,7}\))\(....,{source:).....get\("about.copyright",.\),paragraphClassName:.}\)', "`$1`"<h3>More about SpotX</h3><a href=`'https://github.com/SpotX-CLI/SpotX-Win`'>Github</a><br/><a href=`'https://telegra.ph/SpotX-FAQ-09-19`'>FAQ</a><br/><a href=`'https://t.me/spotify_windows_mod`'>Telegram channel</a><br/><a href=`'https://github.com/SpotX-CLI/SpotX-Win/issues/new?assignees=&labels=%E2%9D%8C+bug&template=bug_report.yml`'>Create an issue report</a><br> <br/><h4>DISCLAIMER</h4>SpotX is a modified version of the official Spotify client, provided as an evaluation version, you use it at your own risk.`"})"
             }
             $n = ($lang).NoVariable6
             $contents = $discript
@@ -898,9 +974,9 @@ function Helper($paramname, $addstring) {
         "OffadsonFullscreen" { 
             $offadson_fullscreen = @{
                 # Removing a billboard on the homepage
-                Bilboard            = '.(\?\[..\(..leaderboard,)', 'false$1' 
+                Bilboard            = '.(\?\[.{1,6}[a-zA-Z].leaderboard,)', 'false$1' 
                 # Removing audio ads
-                AidioAds            = '(case .:)return this.enabled=...+?(;case .:this.subscription=this.audioApi).+?(;case .)', '$1$2.cosmosConnector.increaseStreamTime(-100000000000)$3'
+                AudioAds            = '(case .:)return this.enabled=...+?(;case .:this.subscription=this.audioApi).+?(;case .)', '$1$2.cosmosConnector.increaseStreamTime(-100000000000)$3'
                 # Removing an empty block
                 EmptyBlockAd        = 'adsEnabled:!0', 'adsEnabled:!1'
                 # Fullscreen act., removing upgrade menu, button
@@ -913,22 +989,10 @@ function Helper($paramname, $addstring) {
                 ConnectUnlock3      = '(className:.,disabled:)(..)', '$1false'
                 ConnectUnlock4      = 'return (..isDisabled)(\?(..createElement|\(.{1,10}\))\(..,)', 'return false$2'
                 # Removing the track download quality switch
-                DownloadQuality     = '(children:..\(.,.\)|xe\(.,.\)\)\)\)).+?(children:..\(.,.\)|xe\(.,.\)\)\)\))', '$1'
-                # temporary Russian strings for xpui.js
-                Creator             = '("creator",value:")Creator("\})', '$1Создано$2'
-                CustomOrder         = '("custom-order",value:")Custom order("\})', '$1Особая$2'
-                Alphabetical        = '("alphabetical",value:")Alphabetical("\})', '$1Алфавитная$2'
-                RecentlyAdded       = '("recently-added",value:")Recently added("\})', '$1Недавно добавленные$2' 
-                MostRecent          = '("most-recent",value:")Most recent("\})', '$1Самые последние$2'
+                DownloadQuality     = '(\(.,..jsxs\)\(.{1,3}|..createElement\(.{1,4}),{filterMatchQuery:.{1,6}get\("desktop.settings.downloadQuality.title.+?(children:.{1,2}\(.,.\).+?,|xe\(.,.\).+?,)', ''
             }
             if ($bts) {
-                $offadson_fullscreen.Remove('Bilboard'), $offadson_fullscreen.Remove('AidioAds')
-            }
-            $ofline = Check_verison_clients -param2 "offline"
-            if (!($ru) -or $ofline -le "1.1.94.872") {
-                $offadson_fullscreen.Remove('Creator'), $offadson_fullscreen.Remove('CustomOrder'), $offadson_fullscreen.Remove('Alphabetical'),
-                $offadson_fullscreen.Remove('RecentlyAdded'), $offadson_fullscreen.Remove('MostRecent')
-                
+                $offadson_fullscreen.Remove('Bilboard'), $offadson_fullscreen.Remove('AudioAds')
             }
 
             $n = ($lang).NoVariable2
@@ -1004,17 +1068,7 @@ function Helper($paramname, $addstring) {
                 AlbumReleaseOther   = '"other": "\\"%name%\\" was released %years% years ago this week!"', '"other": "\"%name%\" был выпущен %years% года назад на этой неделе!"'
                 Speed               = '"Speed [{]0[}]×"', '"Скорость {0}×"'                            
                 Confidential        = '"This is a highly confidential test. Do not share details of this test or any song you create outside of Spotify."', '"Это очень конфиденциальный тест. Не делитесь подробностями этого теста или какой-либо песни, которую вы создаете, за пределами Spotify."'          
-                Cache               = '"Cache:"', '"Кеш:"'
-                Downloads           = '"Downloads:"', '"Загрузки:"'
                 StartGroupSession   = '"How to start a Group Session"', '"Как начать групповую сессию"'
-                ForPremium          = '"For: Premium on mobile and tablet"', '"Для: Premium на мобильных устройствах и планшетах"'
-                GroupSessionControl = '"In a group session, everyone invited – no matter where they are – can control what plays."', '"На групповом сеансе каждый приглашенный – независимо от того, где он находится – может контролировать то, что играет."'
-                OpenSpotify         = '"Open Spotify and play something."', '"Откройте Spotify и включите что-нибудь."'
-                TapIcon             = '"Tap [{]icon[}] at the bottom of the screen."', '"Нажмите {icon} в нижней части экрана."'
-                TapStart            = '"Tap Start a remote group session."', '"Нажмите Начать сеанс удаленной группы."'
-                TapInvite           = '"Tap Invite friends."', '"Нажмите Пригласить друзей."'
-                AddFiends           = '"Or, if you want to invite additional friends after you.ve started a group session, tap the avatar at the bottom of the screen and tap [{]icon[}]."', '"Или, если вы хотите пригласить дополнительных друзей после начала группового сеанса, коснитесь аватара в нижней части экрана и нажмите {icon}."'
-                Share               = '"Select how you want to share, or choose Copy link and send it to your friends."', '"Выберите, как вы хотите поделиться, или выберите Скопировать ссылку и отправить ее своим друзьям."'
                 LearnMore           = '"Learn more"', '"Узнать больше"'
                 Author              = '"Author"', '"Автор"'
                 Creator             = '"Creator"', '"Создатель"'
@@ -1037,6 +1091,27 @@ function Helper($paramname, $addstring) {
                 LikedSongs          = '"Liked Songs"', '"Понравившиеся песни"'
                 YourEpisodes        = '"Your Episodes"', '"Ваши эпизоды"'
                 LocalFiles          = '"Local Files"', '"Локальные файлы"'
+                EnhancePrem         = '"Enhance your playlists with Premium"', '"Улучшите свои плейлисты с Premium"'
+                EnhancePrem2        = '"Instantly add personalized tracks that match this playlist.s unique sound"', '"Мгновенно добавляйте персонализированные треки, соответствующие уникальному звучанию этого плейлиста"'
+                EnhancePrem3        = '"Enhance %playlist%"', '"Улучшить %playlist%"'
+                EnhancePrem4        = '"Enhanced"', '"Улучшенный"'
+                EnhancePrem5        = '"Enhance"', '"Улучшить"'
+                HigherQualityAudio  = '"Higher Quality Audio"', '"Более Высокое Качество Звука"'
+                HigherQualityAudio2 = '"Crisp highs & booming lows, a few of the things you.ll hear with high-quality audio"', '"Четкие высокие частоты и гулкие низкие частоты — вот некоторые вещи, которые вы услышите благодаря высококачественному звуку."'
+                Enabled             = '"Enabled"', '"Включено"'
+                ChangeSettings      = '"Change settings"', '"Изменить настройки"'
+                ListenTogether      = '"Listen together, from anywhere"', '"Слушайте вместе, откуда угодно"'
+                InviteFriends       = '"Invite your friends to join you remotely in controlling what plays"', '"Пригласите своих друзей присоединиться к вам удаленно, чтобы контролировать то, что играет"'
+                PublishSongs        = '"Create and publish songs right on Spotify. Choose a song and genre, record your vocals, then edit the song to make it yours."', '"Создавайте и публикуйте песни прямо на Spotify. Выберите песню и жанр, запишите свой вокал, а затем отредактируйте песню, чтобы сделать ее своей."'
+                GroupSession        = '"Group sessions let you and your friends listen to music and podcasts together, from anywhere."', '"Групповые сеансы позволяют вам и вашим друзьям вместе слушать музыку и подкасты из любого места."'
+                GroupSession2       = '"To start your group session:"', '"Чтобы начать групповой сеанс:"'
+                PhoneTablet         = '"Open Spotify on a phone or tablet."', '"Откройте Spotify на телефоне или планшете."'
+                PickSongPodcast     = '"Pick a song or podcast and play it."', '"Выберите песню или подкаст и воспроизведите"'
+                TapIcon             = '"Tap .icon.."', '"Нажмите {icon}."'
+                TapStart            = '"Tap ...Start a remote group session....."', '"Нажмите <b>Начать сеанс удаленной группы</b>."'
+                TapInvite           = '"Tap ...Invite friends....."', '"Нажмите <b>Пригласить друзей</b>."'
+                ShareFriends        = '"Share with your friends."', '"Поделись с друзьями."'
+                GroupSession3       = '"You can only start or join a group session using a phone or tablet."', '"Вы можете начать или присоединиться к групповому сеансу только с помощью телефона или планшета."'
             }
             $n = ($lang).NoVariable7
             $contents = $ru_translate
@@ -1057,7 +1132,7 @@ function Helper($paramname, $addstring) {
                 DisographyArtist = '(Enable a condensed disography shelf on artist pages",default:)(!1)', '$1true' 
                 LyricsMatch      = '(Enable Lyrics match labels in search results",default:)(!1)', '$1true'  
                 Equalizer        = '(Enable audio equalizer for Desktop and Web Player",default:)(!1)', '$1true' 
-                DevicePicker     = '(Enable showing a new and improved device picker UI",default:)(!1)', '$1true'
+                DevicePickerOld  = '(Enable showing a new and improved device picker UI",default:)(!.)', '$1false'
                 NewHome          = '(Enable the new home structure and navigation",values:.,default:)(..DISABLED)', '$1true'
                 MadeForYou       = '(Show "Made For You" entry point in the left sidebar.,default:)(!1)', '$1true'
                 ClearCache       = '(Enable option in settings to clear all downloads",default:)(!1)', '$1true'
@@ -1075,8 +1150,8 @@ function Helper($paramname, $addstring) {
             if ($new_artist_pages_off) { $exp_features.Remove('DisographyArtist') }
             if ($new_lyrics_off) { $exp_features.Remove('LyricsMatch') }
             if ($equalizer_off) { $exp_features.Remove('Equalizer') }
-            if ($device_new_off) { $exp_features.Remove('DevicePicker') }
-            if ($made_for_you_off) { $exp_features.Remove('MadeForYou') }
+            if (!($device_picker_old)) { $exp_features.Remove('DevicePickerOld') }
+            if ($made_for_you_off -or $ofline -ge "1.1.96.783") { $exp_features.Remove('MadeForYou') }
             if ($exp_standart) {
                 $exp_features.Remove('EnhanceLiked'), $exp_features.Remove('EnhancePlaylist'), 
                 $exp_features.Remove('DisographyArtist'), $exp_features.Remove('LyricsMatch'), 
@@ -1257,6 +1332,20 @@ if (Test-Path $xpui_js_patch) {
         $writer.Close()  
     }
 
+    # Static color for lyrics
+    if ($lyrics_stat) {
+        $file_lyrics = get-item $env:APPDATA\Spotify\Apps\xpui\xpui-routes-lyrics.css
+        $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_lyrics
+        $xpui_lyrics = $reader.ReadToEnd()
+        $reader.Close()
+        $xpui_lyrics = Helper -paramname "Lyrics-color" 
+        $writer = New-Object System.IO.StreamWriter -ArgumentList $file_lyrics
+        $writer.BaseStream.SetLength(0)
+        $writer.Write($xpui_lyrics)
+        $writer.Close()  
+    }
+    
+
     # xpui.css
     $file_xpui_css = get-item $env:APPDATA\Spotify\Apps\xpui\xpui.css
     $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_xpui_css
@@ -1276,7 +1365,7 @@ if (Test-Path $xpui_js_patch) {
         # Hide very high quality streaming
         $writer.Write([System.Environment]::NewLine + ' #desktop\.settings\.streamingQuality>option:nth-child(5) {display:none}')
     }
-    # new UI fix
+    # New UI fix
     if (!($navalt_off)) {
         $writer.Write([System.Environment]::NewLine + ' .nav-alt .Root__top-container {background: #00000085;gap: 6px;padding: 8px;}')
         $writer.Write([System.Environment]::NewLine + ' .Root__fixed-top-bar {background-color: #00000000}')
@@ -1408,6 +1497,19 @@ If (Test-Path $xpui_spa_patch) {
         $writer.Close()
     }
 
+    # Static color for lyrics
+    if ($lyrics_stat) {
+        $entry_lyrics = $zip.GetEntry('xpui-routes-lyrics.css')
+        $reader = New-Object System.IO.StreamReader($entry_lyrics.Open())
+        $xpui_lyrics = $reader.ReadToEnd()
+        $reader.Close()
+        $xpui_lyrics = Helper -paramname "Lyrics-color" 
+        $writer = New-Object System.IO.StreamWriter($entry_lyrics.Open())
+        $writer.BaseStream.SetLength(0)
+        $writer.Write($xpui_lyrics)
+        $writer.Close()
+    }
+
     # Add discriptions (xpui-desktop-modals.js)
     $entry_xpui_desktop_modals = $zip.GetEntry('xpui-desktop-modals.js')
     $reader = New-Object System.IO.StreamReader($entry_xpui_desktop_modals.Open())
@@ -1432,7 +1534,7 @@ If (Test-Path $xpui_spa_patch) {
     $writer.Write($xpuiContents_vendor)
     $writer.Close()
 
-    # minification of all *.js
+    # Minification of all *.js
     $zip.Entries | Where-Object FullName -like '*.js' | ForEach-Object {
         $readerjs = New-Object System.IO.StreamReader($_.Open())
         $xpuiContents_js = $readerjs.ReadToEnd()
@@ -1465,7 +1567,7 @@ If (Test-Path $xpui_spa_patch) {
         $writer.Write([System.Environment]::NewLine + ' #desktop\.settings\.streamingQuality>option:nth-child(5) {display:none}')
     }
      
-    # new UI fix
+    # New UI fix
     if (!($navalt_off)) {
         $writer.Write([System.Environment]::NewLine + ' .nav-alt .Root__top-container {background: #00000085;gap: 6px;padding: 8px;}')
         $writer.Write([System.Environment]::NewLine + ' .Root__fixed-top-bar {background-color: #00000000}')
@@ -1568,7 +1670,7 @@ if ($ru) {
     Remove-Item $patch_lang -Exclude *en*, *ru* -Recurse
 }
 
-# create a desktop shortcut
+# Create a desktop shortcut
 $ErrorActionPreference = 'SilentlyContinue' 
 
 if (!($no_shortcut)) {
@@ -1587,7 +1689,7 @@ if (!($no_shortcut)) {
     }
 }
 
-# create shortcut in start menu
+# Create shortcut in start menu
 If (!(Test-Path $start_menu)) {
     $source = "$env:APPDATA\Spotify\Spotify.exe"
     $target = $start_menu
@@ -1642,7 +1744,7 @@ if ($cache_install) {
     downloadScripts -param1 "run_ps"
 
 
-    # create a desktop shortcut
+    # Create a desktop shortcut
     if (!($no_shortcut)) {
         $source2 = "$cache_folder\hide_window.vbs"
         $target2 = "$desktop_folder\Spotify.lnk"
@@ -1654,7 +1756,7 @@ if ($cache_install) {
         $Shortcut2.TargetPath = $source2
         $Shortcut2.Save()
     }
-    # create shortcut in start menu
+    # Create shortcut in start menu
     $source2 = "$cache_folder\hide_window.vbs"
     $target2 = $start_menu
     $WorkingDir2 = "$cache_folder"
