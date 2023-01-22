@@ -1,9 +1,12 @@
 param
 (
-    [Parameter(HelpMessage = 'Remove podcasts/episodes/audiobooks from homepage.')]
+    [Parameter(HelpMessage = 'Hiding podcasts/episodes/audiobooks from homepage.')]
     [switch]$podcasts_off,
+
+    [Parameter(HelpMessage = 'Hiding Ad-like sections from the homepage')]
+    [switch]$adsections_off,
     
-    [Parameter(HelpMessage = 'Do not remove podcasts/episodes/audiobooks from homepage.')]
+    [Parameter(HelpMessage = 'Do not hiding podcasts/episodes/audiobooks from homepage.')]
     [switch]$podcasts_on,
     
     [Parameter(HelpMessage = 'Block Spotify automatic updates.')]
@@ -69,11 +72,8 @@ param
     [Parameter(HelpMessage = 'Return the old device picker')]
     [switch]$device_picker_old,
 
-    [Parameter(HelpMessage = 'Disable the new home structure and navigation.')]
-    [switch]$navalt_off,
-
-    [Parameter(HelpMessage = 'Enable new left sidebar.')]
-    [switch]$left_sidebar_on,
+    [Parameter(HelpMessage = 'New theme activated (new right and left sidebar, some cover change)')]
+    [switch]$new_theme,
     
     [Parameter(HelpMessage = 'Do not create desktop shortcut.')]
     [switch]$no_shortcut,
@@ -82,7 +82,13 @@ param
     [switch]$bts,
 
     [Parameter(HelpMessage = 'Static color for lyrics.')]
-    [int16]$lyrics_stat,
+    [string]$lyrics_stat,
+
+    [Parameter(HelpMessage = 'Accumulation of track listening history with Goofy.')]
+    [string]$urlform_goofy = $null,
+
+    [Parameter(HelpMessage = 'Accumulation of track listening history with Goofy.')]
+    [string]$idbox_goofy = $null,
 
     [Parameter(HelpMessage = 'Error log ru string.')]
     [switch]$err_ru,
@@ -105,101 +111,133 @@ function Format-LanguageCode {
         [string]$LanguageCode
     )
     
-    begin {
-        $supportLanguages = @(
-            'en', 'ru', 'it', 'tr', 'ka', 'pl', 'es', 'fr', 'hi', 'pt', 'id', 'vi', 'ro', 'de', 'hu', 'zh'
-        )
-    }
     
-    process {
-        # Trim the language code down to two letter code.
-        switch -Regex ($LanguageCode) {
-            '^en' {
-                $returnCode = 'en'
-                break
-            }
-            '^(ru|py)' {
-                $returnCode = 'ru'
-                break
-            }
-            '^it' {
-                $returnCode = 'it'
-                break
-            }
-            '^tr' {
-                $returnCode = 'tr'
-                break
-            }
-            '^ka' {
-                $returnCode = 'ka'
-                break
-            }
-            '^pl' {
-                $returnCode = 'pl'
-                break
-            }
-            '^es' {
-                $returnCode = 'es'
-                break
-            }
-            '^fr' {
-                $returnCode = 'fr'
-                break
-            }
-            '^hi' {
-                $returnCode = 'hi'
-                break
-            }
-            '^pt' {
-                $returnCode = 'pt'
-                break
-            }
-            '^id' {
-                $returnCode = 'id'
-                break
-            }
-            '^vi' {
-                $returnCode = 'vi'
-                break
-            }
-            '^ro' {
-                $returnCode = 'ro'
-                break
-            }
-            '^de' {
-                $returnCode = 'de'
-                break
-            }
-            '^hu' {
-                $returnCode = 'hu'
-                break
-            }
-            '^zh' {
-                $returnCode = 'zh'
-                break
-            }
-            Default {
-                $returnCode = $PSUICulture.Remove(2)
-                break
-            }
-        }
-        
-        # Confirm that the language code is supported by this script.
-        if ($returnCode -NotIn $supportLanguages) {
-            # If the language code is not supported default to English.
+    $supportLanguages = @(
+        'en', 'ru', 'it', 'tr', 'ka', 'pl', 'es', 'fr', 'hi', 'pt', 'id', 'vi', 'ro', 'de', 'hu', 'zh', 'zh-TW', 'ko', 'ua', 'fa', 'sr', 'lv', 'bn', 'el'
+    )
+    
+    
+    # Trim the language code down to two letter code.
+    switch -Regex ($LanguageCode) {
+        '^en' {
             $returnCode = 'en'
+            break
+        }
+        '^(ru|py)' {
+            $returnCode = 'ru'
+            break
+        }
+        '^it' {
+            $returnCode = 'it'
+            break
+        }
+        '^tr' {
+            $returnCode = 'tr'
+            break
+        }
+        '^ka' {
+            $returnCode = 'ka'
+            break
+        }
+        '^pl' {
+            $returnCode = 'pl'
+            break
+        }
+        '^es' {
+            $returnCode = 'es'
+            break
+        }
+        '^fr' {
+            $returnCode = 'fr'
+            break
+        }
+        '^hi' {
+            $returnCode = 'hi'
+            break
+        }
+        '^pt' {
+            $returnCode = 'pt'
+            break
+        }
+        '^id' {
+            $returnCode = 'id'
+            break
+        }
+        '^vi' {
+            $returnCode = 'vi'
+            break
+        }
+        '^ro' {
+            $returnCode = 'ro'
+            break
+        }
+        '^de' {
+            $returnCode = 'de'
+            break
+        }
+        '^hu' {
+            $returnCode = 'hu'
+            break
+        }
+        '^(zh|zh-CN)$' {
+            $returnCode = 'zh'
+            break
+        }
+        '^zh-TW' {
+            $returnCode = 'zh-TW'
+            break
+        }
+        '^ko' {
+            $returnCode = 'ko'
+            break
+        }
+        '^ua' {
+            $returnCode = 'ua'
+            break
+        }
+        '^fa' {
+            $returnCode = 'fa'
+            break
+        }
+        '^sr' {
+            $returnCode = 'sr'
+            break
+        }
+        '^lv' {
+            $returnCode = 'lv'
+            break
+        }
+        '^bn' {
+            $returnCode = 'bn'
+            break
+        }
+        '^el' {
+            $returnCode = 'el'
+            break
+        }
+        Default {
+            $returnCode = $PSUICulture
+            $long_code = $true
+            break
         }
     }
-    
-    end {
-        return $returnCode
+        
+    # Checking the long language code
+    if ($long_code -and $returnCode -NotIn $supportLanguages) {
+        $returnCode = $PSUICulture.Remove(2)
     }
+    # Checking the short language code
+    if ($returnCode -NotIn $supportLanguages) {
+        # If the language code is not supported default to English.
+        $returnCode = 'en'
+    }
+    return $returnCode 
 }
 
 function CallLang($clg) {
 
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    $urlLang = "https://raw.githubusercontent.com/Voxel0/scripts/main/en.ps1"
+    $urlLang = "https://raw.githubusercontent.com/amd64fox/SpotX/main/scripts/installer-lang/$clg.ps1"
     $ProgressPreference = 'SilentlyContinue'
     
     try {
@@ -207,129 +245,39 @@ function CallLang($clg) {
     }
     catch {
         Write-Host "Error loading $clg language"
+        Pause
+        Exit
     }
 }
 
 
-function Set-ScriptLanguageStrings($LanguageCode) {
-    
-    #Sets the language strings to be used.
-    
-    switch ($LanguageCode) {
-        'en' {
-            $langStrings = CallLang -clg "en"
-            break
-        }
-        'ru' {
-            $langStrings = CallLang -clg "ru"
-            break
-        }
-        'it' {
-            $langStrings = CallLang -clg "it"
-            break
-        }
-        'tr' {
-            $langStrings = CallLang -clg "tr"
-            break
-        }
-        'ka' {
-            $langStrings = CallLang -clg "ka"
-            break
-        }
-        'pl' {
-            $langStrings = CallLang -clg "pl"
-            break
-        }
-        'es' {
-            $langStrings = CallLang -clg "es"
-            break
-        }
-        'fr' {
-            $langStrings = CallLang -clg "fr"
-            break
-        }
-        'hi' {
-            $langStrings = CallLang -clg "hi"
-            break
-        }
-        'pt' {
-            $langStrings = CallLang -clg "pt"
-            break
-        }
-        'id' {
-            $langStrings = CallLang -clg "id"
-            break
-        }
-        'vi' {
-            $langStrings = CallLang -clg "vi"
-            break
-        }
-        'ro' {
-            $langStrings = CallLang -clg "ro"
-            break
-        }
-        'de' {
-            $langStrings = CallLang -clg "de"
-            break
-        }
-        'hu' {
-            $langStrings = CallLang -clg "hu"
-            break
-        }
-        'zh' {
-            $langStrings = CallLang -clg "zh"
-            break
-        }
-        Default {
-            # Default to English if unable to find a match.
-            $langStrings = CallLang -clg "en"
-            break
-        }
-    }
-    
- 
-    return $langStrings
-}
 
 # Set language code for script.
 $langCode = Format-LanguageCode -LanguageCode $Language
 
-# Set script language strings.
-$lang = Set-ScriptLanguageStrings -LanguageCode $langCode
+$lang = CallLang -clg $langCode
 
 # Set variable 'ru'.
-if ($langCode -eq 'ru') { $ru = $true }
-# Set variable 'add translation line'.
-if ($langCode -match '^(it|tr|ka|pl|es|fr|hi|pt|id|vi|ro|de|hu|zh)') { $line = $true }
-
-# Automatic length of stars
-$au = ($lang).Author.Length + ($lang).Author2.Length
-$by = ($lang).TranslationBy.Length + ($lang).TranslationBy2.Length
-if ($au -gt $by ) { $long = $au + 1 } else { $long = $by + 1 } 
-$st = ""
-$star = $st.PadLeft($long, '*')
-
-Write-Host $star
-Write-Host ($lang).Author"" -NoNewline
-Write-Host ($lang).Author2 -ForegroundColor DarkYellow
-if (!($line)) { Write-Host $star`n }
-if ($line) {
-    Write-Host ($lang).TranslationBy"" -NoNewline
-    Write-Host ($lang).TranslationBy2 -ForegroundColor DarkYellow
-    Write-Host $star`n
+if ($langCode -eq 'ru') { 
+    $ru = $true
+    $urlru = "https://raw.githubusercontent.com/amd64fox/SpotX/main/patches/Augmented%20translation/ru.json"
+    $webjsonru = (Invoke-WebRequest -useb -Uri $urlru).Content | ConvertFrom-Json
 }
+
+Write-Host ($lang).Welcome
+Write-Host ""
 
 # Sending a statistical web query to cutt.ly
 $ErrorActionPreference = 'SilentlyContinue'
 $cutt_url = "https://cutt.ly/DK8UQub"
 try {
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -Uri $cutt_url | Out-Null
+    Invoke-WebRequest -useb -Uri $cutt_url | Out-Null
 }
 catch {
     Start-Sleep -Milliseconds 2300
     try { 
-        Invoke-WebRequest -Uri $cutt_url | Out-Null
+        Invoke-WebRequest -useb -Uri $cutt_url | Out-Null
     }
     catch { }
 }
@@ -338,8 +286,6 @@ $spotifyDirectory = "$env:APPDATA\Spotify"
 $spotifyDirectory2 = "$env:LOCALAPPDATA\Spotify"
 $spotifyExecutable = "$spotifyDirectory\Spotify.exe"
 $exe_bak = "$spotifyDirectory\Spotify.bak"
-$chrome_elf = "$spotifyDirectory\chrome_elf.dll"
-$chrome_elf_bak = "$spotifyDirectory\chrome_elf_bak.dll"
 $cache_folder = "$env:APPDATA\Spotify\cache"
 $spotifyUninstall = "$env:TEMP\SpotifyUninstall.exe"
 $start_menu = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Spotify.lnk"
@@ -359,28 +305,6 @@ function incorrectValue {
     Clear-Host
 } 
 
-function Check_verison_clients($param2) {
-
-    # Checking the recommended version for spotx
-    if ($param2 -eq "online") {
-        $ProgressPreference = 'SilentlyContinue' # Hiding Progress Bars
-        $readme = Invoke-WebRequest -UseBasicParsing -Uri https://raw.githubusercontent.com/SpotX-CLI/SpotX-Win/main/README.md
-        $v = $readme.RawContent | Select-String "Recommended official version \[\d+\.\d+\.\d+\.\d+\]" -AllMatches
-        $ver = $v.Matches.Value
-        $ver = $ver -replace 'Recommended official version \[(\d+\.\d+\.\d+\.\d+)\]', '$1'
-        return $ver
-    }
-    # Check version Spotify offline
-    if ($param2 -eq "offline") {
-        $check_offline = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
-        return $check_offline
-    }
-    # Check version Spotify.bak
-    if ($param2 -eq "Spotify.bak") {
-        $check_offline_bak = (Get-Item $exe_bak).VersionInfo.FileVersion
-        return $check_offline_bak
-    }
-}
 function unlockFolder {
 
     $ErrorActionPreference = 'SilentlyContinue'
@@ -408,25 +332,21 @@ function downloadScripts($param1) {
     if ($param1 -eq "Desktop") {
         Import-Module BitsTransfer
         
-        $ver = Check_verison_clients -param2 "online"
-        $l = "$PWD\links.tsv"
-        $old = [IO.File]::ReadAllText($l)
-        $links = $old -match "https:\/\/upgrade.scdn.co\/upgrade\/client\/win32-x86\/spotify_installer-$ver\.g[0-9a-f]{8}-[0-9]{1,4}\.exe" 
-        $links = $Matches.Values
+        $links = "https://download.scdn.co/upgrade/client/win32-x86/spotify_installer-$onlineFull.exe"
     }
     if ($ru -and $param1 -eq "cache-spotify") {
-        $links2 = "https://raw.githubusercontent.com/SpotX-CLI/SpotX-Win/main/scripts/cache/cache_spotify_ru.ps1"
+        $links2 = "https://raw.githubusercontent.com/amd64fox/SpotX/main/scripts/cache/cache_spotify_ru.ps1"
     }
     if (!($ru) -and $param1 -eq "cache-spotify" ) { 
-        $links2 = "https://raw.githubusercontent.com/SpotX-CLI/SpotX-Win/main/scripts/cache/cache_spotify.ps1"
+        $links2 = "https://raw.githubusercontent.com/amd64fox/SpotX/main/scripts/cache/cache_spotify.ps1"
     }
     
     $web_Url_prev = "https://github.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip", $links, `
-        $links2, "https://raw.githubusercontent.com/SpotX-CLI/SpotX-Win/main/scripts/cache/hide_window.vbs", `
-        "https://raw.githubusercontent.com/SpotX-CLI/SpotX-Win/main/scripts/cache/run_ps.bat", "https://docs.google.com/spreadsheets/d/e/2PACX-1vSFN2hWu4UO-ZWyVe8wlP9c0JsrduA49xBnRmSLOt8SWaOfIpCwjDLKXMTWJQ5aKj3WakQv6-Hnv9rz/pub?gid=0&single=true&output=tsv"
+        $links2, "https://raw.githubusercontent.com/amd64fox/SpotX/main/scripts/cache/hide_window.vbs", `
+        "https://raw.githubusercontent.com/amd64fox/SpotX/main/scripts/cache/run_ps.bat"
 
-    $local_Url_prev = "$PWD\chrome_elf.zip", "$PWD\SpotifySetup.exe", "$cache_folder\cache_spotify.ps1", "$cache_folder\hide_window.vbs", "$cache_folder\run_ps.bat", "$PWD\links.tsv"
-    $web_name_file_prev = "chrome_elf.zip", "SpotifySetup.exe", "cache_spotify.ps1", "hide_window.vbs", "run_ps.bat", "links.tsv"
+    $local_Url_prev = "$PWD\chrome_elf.zip", "$PWD\SpotifySetup.exe", "$cache_folder\cache_spotify.ps1", "$cache_folder\hide_window.vbs", "$cache_folder\run_ps.bat"
+    $web_name_file_prev = "chrome_elf.zip", "SpotifySetup.exe", "cache_spotify.ps1", "hide_window.vbs", "run_ps.bat"
 
     switch ( $param1 ) {
         "BTS" { $web_Url = $web_Url_prev[0]; $local_Url = $local_Url_prev[0]; $web_name_file = $web_name_file_prev[0] }
@@ -434,26 +354,27 @@ function downloadScripts($param1) {
         "cache-spotify" { $web_Url = $web_Url_prev[2]; $local_Url = $local_Url_prev[2]; $web_name_file = $web_name_file_prev[2] }
         "hide_window" { $web_Url = $web_Url_prev[3]; $local_Url = $local_Url_prev[3]; $web_name_file = $web_name_file_prev[3] }
         "run_ps" { $web_Url = $web_Url_prev[4]; $local_Url = $local_Url_prev[4]; $web_name_file = $web_name_file_prev[4] } 
-        "links.tsv" { $web_Url = $web_Url_prev[5]; $local_Url = $local_Url_prev[5]; $web_name_file = $web_name_file_prev[5] }
     }
 
     if ($param1 -eq "Desktop") {
         try { if (curl.exe -V) { $curl_check = $true } }
         catch { $curl_check = $false }
-        $vernew = Check_verison_clients -param2 "online"
     }
     try { 
         if ($param1 -eq "Desktop" -and $curl_check) {
-            $stcode = curl.exe -I -s $web_Url --retry 1 --ssl-no-revoke
-            if (!($stcode -match "200 OK")) { throw ($lang).Download6 }
+            $stcode = curl.exe -s -w "%{http_code}" -o /dev/null $web_Url --retry 2 --ssl-no-revoke
+            if ($stcode -ne "200") { throw ($lang).Download6 }
             curl.exe $web_Url -o $local_Url --progress-bar --retry 3 --ssl-no-revoke
+            return
         }
-        if ($param1 -eq "Desktop" -and $null -ne (Get-Module -Name BitsTransfer -ListAvailable) -and !($curl_check )) {
+        if ($param1 -eq "Desktop" -and !($curl_check ) -and $null -ne (Get-Module -Name BitsTransfer -ListAvailable)) {
             $ProgressPreference = 'Continue'
-            Start-BitsTransfer -Source  $web_Url -Destination $local_Url  -DisplayName ($lang).Download5 -Description "$vernew "
+            Start-BitsTransfer -Source  $web_Url -Destination $local_Url  -DisplayName ($lang).Download5 -Description "$online "
+            return
         }
-        if ($param1 -eq "Desktop" -and $null -eq (Get-Module -Name BitsTransfer -ListAvailable) -and !($curl_check )) {
+        if ($param1 -eq "Desktop" -and !($curl_check ) -and $null -eq (Get-Module -Name BitsTransfer -ListAvailable)) {
             $webClient.DownloadFile($web_Url, $local_Url) 
+            return
         }
         if ($param1 -ne "Desktop") {
             $ProgressPreference = 'SilentlyContinue' # Hiding Progress Bars
@@ -471,15 +392,18 @@ function downloadScripts($param1) {
         try { 
 
             if ($param1 -eq "Desktop" -and $curl_check) {
-                $stcode = curl.exe -I -s $web_Url --retry 1 --ssl-no-revoke
-                if (!($stcode -match "200 OK")) { throw ($lang).Download6 }
+                $stcode = curl.exe -s -w "%{http_code}" -o /dev/null $web_Url --retry 2 --ssl-no-revoke
+                if ($stcode -ne "200") { throw ($lang).Download6 }
                 curl.exe $web_Url -o $local_Url --progress-bar --retry 3 --ssl-no-revoke
+                return
             }
             if ($param1 -eq "Desktop" -and $null -ne (Get-Module -Name BitsTransfer -ListAvailable) -and !($curl_check )) {
                 Start-BitsTransfer -Source  $web_Url -Destination $local_Url  -DisplayName ($lang).Download5 -Description "$vernew "
+                return
             }
             if ($param1 -eq "Desktop" -and $null -eq (Get-Module -Name BitsTransfer -ListAvailable) -and !($curl_check )) {
                 $webClient.DownloadFile($web_Url, $local_Url) 
+                return
             }
             if ($param1 -ne "Desktop") {
                 $webClient.DownloadFile($web_Url, $local_Url) 
@@ -521,12 +445,22 @@ function DesktopFolder {
     return $desktop_folder
 }
 
+# Recommended version for spotx
+$onlineFull = "1.2.3.1115.gd61a8f5c-384"
+$online = ($onlineFull -split ".g")[0]
+
+# Check version Spotify offline
+$offline = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
+
+# Check version Spotify.bak
+$offline_bak = (Get-Item $exe_bak).VersionInfo.FileVersion
+
 # add Tls12
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 Stop-Process -Name Spotify
-
-if ($PSVersionTable.PSVersion.major -ge 7) {
+$psv = $PSVersionTable.PSVersion.major
+if ($psv -ge 7) {
     Import-Module Appx -UseWindowsPowerShell -WarningAction:SilentlyContinue
 }
 
@@ -609,17 +543,12 @@ if (!($premium) -and $bts) {
     [System.IO.Compression.ZipFileExtensions]::ExtractToDirectory($zip, $PWD)
     $zip.Dispose()
 }
-downloadScripts -param1 "links.tsv"
-
-
-$online = Check_verison_clients -param2 "online"
 
 $spotifyInstalled = (Test-Path -LiteralPath $spotifyExecutable)
 
 if ($spotifyInstalled) {
 
-    $offline = Check_verison_clients -param2 "offline"
-
+    # Old version Spotify
     if ($online -gt $offline) {
         if ($confirm_spoti_recomended_over -or $confirm_spoti_recomended_unistall) {
             Write-Host ($lang).OldV`n
@@ -670,8 +599,33 @@ if ($spotifyInstalled) {
             $downgrading = $true
         }
     }
-
+    
+    # Unsupported version Spotify
     if ($online -lt $offline) {
+        # Submit unsupported version of Spotify to google form for further processing
+        try { 
+            $txt = [IO.File]::ReadAllText($spotifyExecutable)
+            $regex = "(\d+)\.(\d+)\.(\d+)\.(\d+)(\.g[0-9a-f]{8})"
+            $v = $txt | Select-String $regex -AllMatches
+            $version = $v.Matches.Value[0]
+            if ($version.Count -gt 1) { $version = $version[0] }
+
+            $Parameters = @{
+                Uri    = 'https://docs.google.com/forms/d/e/1FAIpQLSegGsAgilgQ8Y36uw-N7zFF6Lh40cXNfyl1ecHPpZcpD8kdHg/formResponse'
+                Method = 'POST'
+                Body   = @{
+                    'entry.620327948'  = $version
+                    'entry.1402903593' = $win_os
+                    'entry.860691305'  = $psv
+                    'entry.2067427976' = $online + " меньше чем " + $offline
+                }   
+            }
+            Invoke-WebRequest -useb @Parameters | Out-Null
+        }
+        catch {
+            Write-Host 'Unable to submit new version of Spotify' 
+            Write-Host "error description: "$Error[0]
+        }
 
         if ($confirm_spoti_recomended_over -or $confirm_spoti_recomended_unistall) {
             Write-Host ($lang).NewV`n
@@ -771,6 +725,12 @@ if (-not $spotifyInstalled -or $upgrade_client) {
     while (-not (get-process | Where-Object { $_.ProcessName -eq 'SpotifySetup' })) {}
     wait-process -name SpotifySetup
     Stop-Process -Name Spotify
+
+    # Upgrade check version Spotify offline
+    $offline = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
+
+    # Upgrade check version Spotify.bak
+    $offline_bak = (Get-Item $exe_bak).VersionInfo.FileVersion
 }
 
 # Delete Spotify shortcut if it is on desktop
@@ -779,21 +739,6 @@ if ($no_shortcut) {
     $desktop_folder = DesktopFolder
     Start-Sleep -Milliseconds 1000
     remove-item "$desktop_folder\Spotify.lnk" -Recurse -Force
-}
-
-# Delete the leveldb folder (Fixes bug with incorrect experimental features for some accounts)
-<# 
-$leveldb = (Test-Path -LiteralPath "$spotifyDirectory2\Browser\Local Storage\leveldb")
-
-if ($leveldb) {
-    $ErrorActionPreference = 'SilentlyContinue'
-    remove-item "$spotifyDirectory2\Browser\Local Storage\leveldb" -Recurse -Force
-}
-#>
-
-# Create backup chrome_elf.dll
-if (!(Test-Path -LiteralPath $chrome_elf_bak) -and !($premium) -and $bts) {
-    Move-Item $chrome_elf $chrome_elf_bak 
 }
 
 $ch = $null
@@ -844,9 +789,7 @@ if ($ch -eq 'y') { $block_update = $true }
 
 if ($ch -eq 'n') {
     $ErrorActionPreference = 'SilentlyContinue'
-    $exe_onl_fn = Check_verison_clients -param2 "offline"
-    $exe_bak_fn = Check_verison_clients -param2 'Spotify.bak'
-    if ((Test-Path -LiteralPath $exe_bak) -and $exe_onl_fn -eq $exe_bak_fn) {
+    if ((Test-Path -LiteralPath $exe_bak) -and $offline -eq $offline_bak) {
         Remove-Item $spotifyExecutable -Recurse -Force
         Rename-Item $exe_bak $spotifyExecutable
     }
@@ -904,295 +847,292 @@ if (!($cache_on) -and !($cache_off)) {
 if ($exp_standart) { Write-Host ($lang).ExpStandart`n }
 if ($exp_spotify) { Write-Host ($lang).ExpSpotify`n }
 
-function Helper($paramname, $addstring) {
+$url = "https://raw.githubusercontent.com/amd64fox/SpotX/main/patches/patches.json"
+$webjson = (Invoke-WebRequest -useb -Uri $url).Content | ConvertFrom-Json
+
+function Helper($paramname) {
 
     switch ( $paramname ) {
         "HtmlLicMin" { 
             # licenses.html minification
-            $html_lic_min = @{
-                HtmlLicMin1 = '<li><a href="#6eef7">zlib<\/a><\/li>\n(.|\n)*<\/p><!-- END CONTAINER DEPS LICENSES -->(<\/div>)', '$2'
-                HtmlLicMin2 = '	', ''
-                HtmlLicMin3 = '  ', ''
-                HtmlLicMin4 = '(?m)(^\s*\r?\n)', ''
-                HtmlLicMin5 = '\r?\n(?!\(1|\d)', ''
-            }
-            $n = ($lang).NoVariable3
-            $contents = $html_lic_min
-            $paramdata = $xpuiContents_html
+            $name = "patches.json.others."
+            $n = "licenses.html"
+            $contents = "htmlmin"
+            $json = $webjson.others
+        }
+        "HtmlBlank" { 
+            # htmlBlank minification
+            $name = "patches.json.others."
+            $n = "blank.html"
+            $contents = "blank.html"
+            $json = $webjson.others
+        }
+        "MinJs" { 
+            # Minification of all *.js
+            $contents = "minjs"
+            $json = $webjson.others
+        }
+        "MinJson" { 
+            # Minification of all *.json
+            $contents = "minjson"
+            $json = $webjson.others
+        }
+        "FixOldTheme" { 
+            # Remove indent for old theme xpui.css
+            $name = "patches.json.others."
+            $n = "xpui.css"
+            $contents = "fix-old-theme"
+            $json = $webjson.others
+        }
+        "RemovertlCssmin" { 
+            # Remove RTL and minification of all *.css
+            $contents = "removertl-cssmin"
+            $json = $webjson.others
+        }
+        "DisableSentry" { 
+            # Disable Sentry (vendor~xpui.js)
+            $name = "patches.json.others."
+            $n = "vendor~xpui.js"
+            $contents = "disablesentry"
+            $json = $webjson.others
+        }
+        "DisabledLog" { 
+            # Disabled logging
+            $name = "patches.json.others."
+            $n = "xpui.js"
+            $contents = "disablelog"
+            $json = $webjson.others
         }
         "Lyrics-color" { 
-            # Static color for lyrics (xpui-routes-lyrics.css)
+            $pasttext = $webjson.others.themelyrics.theme.$lyrics_stat.pasttext
+            $current = $webjson.others.themelyrics.theme.$lyrics_stat.current
+            $next = $webjson.others.themelyrics.theme.$lyrics_stat.next
+            $background = $webjson.others.themelyrics.theme.$lyrics_stat.background
+            $hover = $webjson.others.themelyrics.theme.$lyrics_stat.hover
+            $maxmatch = $webjson.others.themelyrics.theme.$lyrics_stat.maxmatch
 
-            $pasttext = "#ffffff4a", "#ffffffb8", "#ffffff6b", "#E40909B3"
-            $current = "#ffffffc7", "#ffffffc7", "#ffffffc7", "#C2C2C2"
-            $next = "#ffffff4a", "#322319", "#2e080b", "#CA861A"
-            $hover = "#ffffffc7", "#ffffffc7", "#ffffffc7", "#0FD40F"
-            $background = "#121212", "#956b4b", "#c62736f2", "#121212"
-            $maxmatch = "#ffffff94", "#322319", "#2e080b", "#C2C2C2"
+            if ($offline -lt "1.1.99.871") { $lyrics = "lyricscolor1"; $contents = $lyrics }
+            if ($offline -ge "1.1.99.871") { $lyrics = "lyricscolor2"; $contents = $lyrics }
 
-            switch ($lyrics_stat) {
-                1 { 
-                    $pasttextR = $pasttext[0]; $currentR = $current[0]; $nextR = $next[0]; $hoverR = $hover[0]; $backgroundR = $background[0]; $maxmatchR = $maxmatch[0]
-                }
-                2 { 
-                    $pasttextR = $pasttext[1]; $currentR = $current[1]; $nextR = $next[1]; $hoverR = $hover[1]; $backgroundR = $background[1]; $maxmatchR = $maxmatch[1]
-                }
-                3 { 
-                    $pasttextR = $pasttext[2]; $currentR = $current[2]; $nextR = $next[2]; $hoverR = $hover[2]; $backgroundR = $background[2]; $maxmatchR = $maxmatch[2]
-                }
-                4 { 
-                    $pasttextR = $pasttext[3]; $currentR = $current[3]; $nextR = $next[3]; $hoverR = $hover[3]; $backgroundR = $background[3]; $maxmatchR = $maxmatch[3]
-                }
-                Default {
-                    $pasttextR = $pasttext[0]; $currentR = $current[0]; $nextR = $next[0]; $hoverR = $hover[0]; $backgroundR = $background[0]; $maxmatchR = $maxmatch[0]
-                }
-
+            # xpui-routes-lyrics.js
+            if ($offline -ge "1.1.99.871") {
+                $webjson.others.$lyrics.replace[1] = '$1' + '"' + $pasttext + '"'  
+                $webjson.others.$lyrics.replace[2] = '$1' + '"' + $current + '"'  
+                $webjson.others.$lyrics.replace[3] = '$1' + '"' + $next + '"'  
+                $webjson.others.$lyrics.replace[4] = '$1' + '"' + $background + '"'
+                $webjson.others.$lyrics.replace[5] = '$1' + '"' + $hover + '"'   
+                $webjson.others.$lyrics.replace[6] = '$1' + '"' + $maxmatch + '"'
             }
-            $lyrics = @{
-                pasttext   = '(H2J92dVdr0ykdOX5azL1{color:)var\(--lyrics-color-active\)', "`$1$pasttextR"
-                current    = '((TDPh45khCfG51fNwNIiw|E64X_eoy6xsJmDdKKHja){color:)var\(--lyrics-color-active\)', "`$1$currentR"
-                next       = '(NHVfxGs2HwmI_fly2JC4{color:)var\(--lyrics-color-inactive\)' , "`$1$nextR"
-                hover      = '(NHVfxGs2HwmI_fly2JC4:hover{color:)var\(--lyrics-color-active\)' , "`$1$hoverR"
-                background = 'var\(--lyrics-color-background\)', $backgroundR
-                maxmatch   = '(iq4cgi0YEKr6DGaTtzUj{color:)var\(--lyrics-color-inactive\)', "`$1$maxmatchR"
-            }
-            $n = ($lang).NoVariable6
-            $contents = $lyrics
-            $paramdata = $xpui_lyrics
 
+            # xpui-routes-lyrics.css
+            if ($offline -lt "1.1.99.871") {
+                $webjson.others.$lyrics.replace[0] = '$1' + $pasttext
+                $webjson.others.$lyrics.replace[1] = '$1' + $current
+                $webjson.others.$lyrics.replace[2] = '$1' + $next
+                $webjson.others.$lyrics.replace[3] = $background 
+                $webjson.others.$lyrics.replace[4] = '$1' + $hover 
+                $webjson.others.$lyrics.replace[5] = '$1' + $maxmatch 
+            }
+            $name = "patches.json.others."
+            $n = $name_file
+            $json = $webjson.others
+        }
+        "Fix-New-Lirics" {
+            $name = "patches.json.others."
+            $contents = "fixcsslyricscolor2"
+            $n = "xpui.css"
+            $json = $webjson.others
         }
         "Discriptions" {  
             # Add discriptions (xpui-desktop-modals.js)
-            $discript = @{
-                Log = '((..createElement|children:\(.{1,7}\))\(....,{source:).....get\("about.copyright",.\),paragraphClassName:.}\)', "`$1`"<h3>More about SpotX</h3><a href=`'https://github.com/SpotX-CLI/SpotX-Win`'>Github</a><br/><a href=`'https://telegra.ph/SpotX-FAQ-09-19`'>FAQ</a><br/><a href=`'https://t.me/spotify_windows_mod`'>Telegram channel</a><br/><a href=`'https://github.com/SpotX-CLI/SpotX-Win/issues/new?assignees=&labels=%E2%9D%8C+bug&template=bug_report.yml`'>Create an issue report</a><br> <br/><h4>DISCLAIMER</h4>SpotX is a modified version of the official Spotify client, provided as an evaluation version, you use it at your own risk.`"})"
-            }
-            $n = ($lang).NoVariable6
-            $contents = $discript
-            $paramdata = $xpui_desktop_modals
-
+            $name = "patches.json.others."
+            $n = "xpui-desktop-modals.js"
+            $contents = "discriptions"
+            $json = $webjson.others
         }
         "OffadsonFullscreen" { 
-            $offadson_fullscreen = @{
-                # Removing a billboard on the homepage
-                Bilboard            = '.(\?\[.{1,6}[a-zA-Z].leaderboard,)', 'false$1' 
-                # Removing audio ads
-                AudioAds            = '(case .:)return this.enabled=...+?(;case .:this.subscription=this.audioApi).+?(;case .)', '$1$2.cosmosConnector.increaseStreamTime(-100000000000)$3'
-                # Removing an empty block
-                EmptyBlockAd        = 'adsEnabled:!0', 'adsEnabled:!1'
-                # Fullscreen act., removing upgrade menu, button
-                FullScreenAd        = '(return|.=.=>)"free"===(.+?)(return|.=.=>)"premium"===', '$1"premium"===$2$3"free"==='
-                # Disabling a playlist sponsor
-                PlaylistSponsorsOff = 'allSponsorships', ''
-                # Connect unlock test for 1.1.91 >
-                ConnectUnlock       = ' connect-device-list-item--disabled', ''
-                ConnectUnlock2      = 'connect-picker.unavailable-to-control', 'spotify-connect'
-                ConnectUnlock3      = '(className:.,disabled:)(..)', '$1false'
-                ConnectUnlock4      = 'return (..isDisabled)(\?(..createElement|\(.{1,10}\))\(..,)', 'return false$2'
-                # Removing the track download quality switch
-                DownloadQuality     = '(\(.,..jsxs\)\(.{1,3}|..createElement\(.{1,4}),{filterMatchQuery:.{1,6}get\("desktop.settings.downloadQuality.title.+?(children:.{1,2}\(.,.\).+?,|xe\(.,.\).+?,)', ''
-            }
-            if ($bts) {
-                $offadson_fullscreen.Remove('Bilboard'), $offadson_fullscreen.Remove('AudioAds')
-            }
-
-            $n = ($lang).NoVariable2
-            $contents = $offadson_fullscreen
-            $paramdata = $xpui_js
+            # Full screen mode activation and removing "Upgrade to premium" menu, upgrade button, disabling a playlist sponsor
+            if ($bts) { $webjson.free.psobject.properties.remove('bilboard'), $webjson.free.psobject.properties.remove('audioads') }
+            $name = "patches.json.free."
+            $n = "xpui.js"
+            $contents = $webjson.free.psobject.properties.name
+            $json = $webjson.free
         }
         "OffPodcasts" {  
             # Turn off podcasts
-            $podcasts_off = @{
-                PodcastsOff = '(\!Array.isArray\(.\)\|\|.===..length)', "`$1||e.children[0].key.includes('episode')||e.children[0].key.includes('show')"
-            }
-            $n = ($lang).NoVariable5
-            $contents = $podcasts_off
-            $paramdata = $xpui_homev2
+            if ($offline -le "1.1.92.647") { $contents = "podcastsoff" }
+            if ($offline -ge "1.1.93.896" -and $offline -le "1.1.96.785") { $contents = "podcastsoff2" }
+            if ($offline -ge "1.1.97.952") { $contents = "podcastsoff3" }
+            $n = $js
+            $name = "patches.json.others."
+            $json = $webjson.others
+        }
+        "OffAdSections" {  
+            # Hiding Ad-like sections from the homepage
+            if ($offline -le "1.1.96.785") { $webjson.others.adsectionsoff.replace = '$1 if ($3' + $webjson.others.adsectionsoff.replace }
+            else { $webjson.others.adsectionsoff.replace = '$1 if ($4' + $webjson.others.adsectionsoff.replace }
+            $n = $js
+            $name = "patches.json.others."
+            $contents = "adsectionsoff"
+            $json = $webjson.others
         }
         "OffRujs" { 
             # Remove all languages except En and Ru from xpui.js
-            $rus_js = @{
-                OffRujs = '(\[a\.go\.en,)(.+?\])', '$1a.go.ru]'
-            }
-            $n = ($lang).NoVariable2
-            $contents = $rus_js
-            $paramdata = $xpui_js
+            $name = "patches.json.others."
+            $n = "xpui.js"
+            $contents = "offrujs"
+            $json = $webjson.others
         }
         "RuTranslate" { 
             # Additional translation of some words for the Russian language
-            $ru_translate = @{
-                EnhancePlaylist     = '"To Enhance this playlist, you.ll need to go online."', '"Чтобы улучшить этот плейлист, вам нужно подключиться к интернету."'
-                ConfirmAge          = '"Confirm your age"', '"Подтвердите свой возраст"' 
-                Premium             = '"%price%\/month after. Terms and conditions apply. One month free not available for users who have already tried Premium."', '"%price%/месяц спустя. Принять условия. Один месяц бесплатно, недоступно для пользователей, которые уже попробовали Premium."'
-                AdFreeMusic         = '"Enjoy ad-free music listening, offline listening, and more. Cancel anytime."', '"Наслаждайтесь прослушиванием музыки без рекламы, прослушиванием в офлайн режиме и многим другим. Отменить можно в любое время."'
-                AddPlaylist         = '"Add to another playlist"', '"Добавить в другой плейлист"' 
-                OfflineStorage      = '"Offline storage location"', '"Хранилище скачанных треков"' 
-                ChangeLocation      = '"Change location"', '"Изменить место"' 
-                Linebreaks          = '"Line breaks aren.t supported in the description."', '"В описании не поддерживаются разрывы строк."' 
-                PressSave           = '"Press save to keep changes you.ve made."', '"Нажмите «Сохранить», чтобы сохранить внесенные изменения."' 
-                NoInternet          = '"No internet connection found. Changes to description and image will not be saved."', '"Подключение к интернету не найдено. Изменения в описании и изображении не будут сохранены."' 
-                ImageSmall          = '"Image too small. Images must be at least [{]0[}]x[{]1[}]."', '"Изображение слишком маленькое. Изображения должны быть не менее {0}x{1}."' 
-                FailedUpload        = '"Failed to upload image. Please try again."', '"Не удалось загрузить изображение. Пожалуйста, попробуйте снова."' 
-                Description         = '"Description"', '"Описание"' 
-                ChangePhoto         = '"Change photo"', '"Сменить изображение"' 
-                RemovePhoto         = '"Remove photo"', '"Удалить изображение"' 
-                Name                = '"Name"', '"Имя"' 
-                ChangeSpeed         = '"Change speed"', '"Изменение скорости"' 
-                Years19             = '"You need to be at least 19 years old to listen to explicit content marked with"', '"Вам должно быть не менее 19 лет, чтобы слушать непристойный контент, помеченный значком"' 
-                AddPlaylist2        = '"Add to this playlist"', '"Добавить в этот плейлист"'
-                NoConnect           = '"Couldn.t connect to Spotify."', '"Не удалось подключиться к Spotify."' 
-                Reconnecting        = '"Reconnecting..."', '"Повторное подключение..."' 
-                NoConnection        = '"No connection"', '"Нет соединения"' 
-                CharacterCounter    = '"Character counter"', '"Счетчик символов"' 
-                Lightsaber          = '"Toggle lightsaber hilt. Current is [{]0[}]."', '"Переключить рукоять светового меча. Текущий {0}."' 
-                SongAvailable       = '"Song not available"', '"Песня недоступна"' 
-                HiFi                = '"The song you.re trying to listen to is not available in HiFi at this time."', '"Песня, которую вы пытаетесь прослушать, в настоящее время недоступна в HiFi."' 
-                Quality             = '"Current audio quality:"', '"Текущее качество звука:"' 
-                Network             = '"Network connection"', '"Подключение к сети"' 
-                Good                = '"Good"', '"Хорошее"' 
-                Poor                = '"Poor"', '"Плохое"' 
-                Yes                 = '"Yes"', '"Да"' 
-                No                  = '"No"', '"Нет"' 
-                Location            = '"Your Location"', '"Ваше местоположение"'
-                NetworkConnection   = '"Network connection failed while playing this content."', '"Сбой сетевого подключения при воспроизведении этого контента."'
-                ContentLocation     = '"We.re not able to play this content in your current location."', '"Мы не можем воспроизвести этот контент в вашем текущем местоположении."'
-                ContentUnavailable  = '"This content is unavailable. Try another\?"', '"Этот контент недоступен. Попробуете другой?"'
-                NoContent           = '"Sorry, we.re not able to play this content."', '"К сожалению, мы не можем воспроизвести этот контент."'
-                NoContent2          = '"Hmm... we can.t seem to play this content. Try installing the latest version of Spotify."', '"Хм... похоже, мы не можем воспроизвести этот контент. Попробуйте установить последнюю версию Spotify."'
-                NoContent3          = '"Please upgrade Spotify to play this content."', '"Пожалуйста, обновите Spotify, чтобы воспроизвести этот контент."'
-                NoContent4          = '"This content cannot be played on your operating system version."', '"Этот контент нельзя воспроизвести в вашей версии операционной системы."'
-                DevLang             = '"Override certain user attributes to test regionalized content programming. The overrides are only active in this app."', '"Переопределите определенные атрибуты пользователя, чтобы протестировать региональное программирование контента. Переопределения активны только в этом приложении."'
-                AlbumRelease        = '"...name... was released this week!"', '"\"%name%\" был выпущен на этой неделе!"'
-                AlbumReleaseOne     = '"one": "\\"%name%\\" was released %years% year ago this week!"', '"one": "\"%name%\" был выпущен %years% год назад на этой неделе!"'
-                AlbumReleaseFew     = '"few": "\\"%name%\\" was released %years% years ago this week!"', '"few": "\"%name%\" был выпущен %years% года назад на этой неделе!"'
-                AlbumReleaseMany    = '"many": "\\"%name%\\" was released %years% years ago this week!"', '"many": "\"%name%\" был выпущен %years% лет назад на этой неделе!"'
-                AlbumReleaseOther   = '"other": "\\"%name%\\" was released %years% years ago this week!"', '"other": "\"%name%\" был выпущен %years% года назад на этой неделе!"'
-                Speed               = '"Speed [{]0[}]×"', '"Скорость {0}×"'                            
-                Confidential        = '"This is a highly confidential test. Do not share details of this test or any song you create outside of Spotify."', '"Это очень конфиденциальный тест. Не делитесь подробностями этого теста или какой-либо песни, которую вы создаете, за пределами Spotify."'          
-                StartGroupSession   = '"How to start a Group Session"', '"Как начать групповую сессию"'
-                LearnMore           = '"Learn more"', '"Узнать больше"'
-                Author              = '"Author"', '"Автор"'
-                Creator             = '"Creator"', '"Создатель"'
-                CustomOrder         = '"Custom order"', '"Особая"'
-                Alphabetical        = '"Alphabetical"', '"Алфавитная"'
-                RecentlyAdded       = '"Recently added"', '"Недавно добавленные"'
-                RecentlyPlayed      = '"Recently played"', '"Недавно проигранные"'
-                MostRecent          = '"Most recent"', '"Самые последние"'
-                RecentlyUpdated     = '"Recently updated"', '"Недавно обновленные"'
-                MostRelevant        = '"Most relevant"', '"Наиболее актуальные"'
-                Albums              = '"Albums",', '"Альбомы",'
-                Artists             = '"Artists",', '"Артисты",'
-                Playlists           = '"Playlists",', '"Плейлисты",'
-                PodcastsShows       = '"Podcasts . Shows",', '"Подкасты и Шоу",'
-                Audiobooks          = '"Audiobooks",', '"Аудиокниги",'
-                Downloaded          = '"Downloaded"', '"Скачано"'
-                ByYou               = '"By you"', '"Ваши"'
-                Unplayed            = '"Unplayed"', '"Невоспроизведенное"'
-                InProgress          = '"In progress"', '"В процессе"'
-                LikedSongs          = '"Liked Songs"', '"Понравившиеся песни"'
-                YourEpisodes        = '"Your Episodes"', '"Ваши эпизоды"'
-                LocalFiles          = '"Local Files"', '"Локальные файлы"'
-                EnhancePrem         = '"Enhance your playlists with Premium"', '"Улучшите свои плейлисты с Premium"'
-                EnhancePrem2        = '"Instantly add personalized tracks that match this playlist.s unique sound"', '"Мгновенно добавляйте персонализированные треки, соответствующие уникальному звучанию этого плейлиста"'
-                EnhancePrem3        = '"Enhance %playlist%"', '"Улучшить %playlist%"'
-                EnhancePrem4        = '"Enhanced"', '"Улучшенный"'
-                EnhancePrem5        = '"Enhance"', '"Улучшить"'
-                HigherQualityAudio  = '"Higher Quality Audio"', '"Более Высокое Качество Звука"'
-                HigherQualityAudio2 = '"Crisp highs & booming lows, a few of the things you.ll hear with high-quality audio"', '"Четкие высокие частоты и гулкие низкие частоты — вот некоторые вещи, которые вы услышите благодаря высококачественному звуку."'
-                Enabled             = '"Enabled"', '"Включено"'
-                ChangeSettings      = '"Change settings"', '"Изменить настройки"'
-                ListenTogether      = '"Listen together, from anywhere"', '"Слушайте вместе, откуда угодно"'
-                InviteFriends       = '"Invite your friends to join you remotely in controlling what plays"', '"Пригласите своих друзей присоединиться к вам удаленно, чтобы контролировать то, что играет"'
-                PublishSongs        = '"Create and publish songs right on Spotify. Choose a song and genre, record your vocals, then edit the song to make it yours."', '"Создавайте и публикуйте песни прямо на Spotify. Выберите песню и жанр, запишите свой вокал, а затем отредактируйте песню, чтобы сделать ее своей."'
-                GroupSession        = '"Group sessions let you and your friends listen to music and podcasts together, from anywhere."', '"Групповые сеансы позволяют вам и вашим друзьям вместе слушать музыку и подкасты из любого места."'
-                GroupSession2       = '"To start your group session:"', '"Чтобы начать групповой сеанс:"'
-                PhoneTablet         = '"Open Spotify on a phone or tablet."', '"Откройте Spotify на телефоне или планшете."'
-                PickSongPodcast     = '"Pick a song or podcast and play it."', '"Выберите песню или подкаст и воспроизведите"'
-                TapIcon             = '"Tap .icon.."', '"Нажмите {icon}."'
-                TapStart            = '"Tap ...Start a remote group session....."', '"Нажмите <b>Начать сеанс удаленной группы</b>."'
-                TapInvite           = '"Tap ...Invite friends....."', '"Нажмите <b>Пригласить друзей</b>."'
-                ShareFriends        = '"Share with your friends."', '"Поделись с друзьями."'
-                GroupSession3       = '"You can only start or join a group session using a phone or tablet."', '"Вы можете начать или присоединиться к групповому сеансу только с помощью телефона или планшета."'
-            }
-            $n = ($lang).NoVariable7
-            $contents = $ru_translate
-            $paramdata = $xpui_ru
+            $n = "ru.json"
+            $contents = $webjsonru.psobject.properties.name
+            $json = $webjsonru
         }
-
+        "Collaborators" { 
+            # Hide Collaborators icon
+            $name = "patches.json.others."
+            $n = "xpui-routes-playlist.js"
+            $contents = "collaboration"
+            $json = $webjson.others
+        }
+        "Goofy-History" { 
+            # Accumulation of track listening history with Goofy
+            $name = "patches.json.others."
+            $n = "xpui.js"
+            $contents = "goofyhistory"
+            $webjson.others.$contents.replace = "`$1 const urlForm=" + '"' + $urlform_goofy + '"' + ";const idBox=" + '"' + $idbox_goofy + '"' + $webjson.others.$contents.replace
+            $json = $webjson.others
+        }
         "ExpFeature" { 
-            # Experimental Feature Standart
-            $exp_features = @{
-                LikedArtistPage  = '(Enable Liked Songs section on Artist page",default:)(!1)', '$1true' 
-                BlockUsers       = '(Enable block users feature in clientX",default:)(!1)', '$1true' 
-                Quicksilver      = '(Enables quicksilver in-app messaging modal",default:)(!0)', '$1false' 
-                IgnorInRec       = '(Enable Ignore In Recommendations for desktop and web",default:)(!1)', '$1true'
-                Prod             = '(Enable Playlist Permissions flows for Prod",default:)(!1)', '$1true'
-                ShowingBalloons  = '(Enable showing balloons on album release date anniversaries",default:)(!1)', '$1true'
-                EnhanceLiked     = '(Enable Enhance Liked Songs UI and functionality",default:)(!1)', '$1true'
-                EnhancePlaylist  = '(Enable Enhance Playlist UI and functionality for end-users",default:)(!1)', '$1true' 
-                DisographyArtist = '(Enable a condensed disography shelf on artist pages",default:)(!1)', '$1true' 
-                LyricsMatch      = '(Enable Lyrics match labels in search results",default:)(!1)', '$1true'  
-                Equalizer        = '(Enable audio equalizer for Desktop and Web Player",default:)(!1)', '$1true' 
-                DevicePickerOld  = '(Enable showing a new and improved device picker UI",default:)(!.)', '$1false'
-                NewHome          = '(Enable the new home structure and navigation",values:.,default:)(..DISABLED)', '$1true'
-                MadeForYou       = '(Show "Made For You" entry point in the left sidebar.,default:)(!1)', '$1true'
-                ClearCache       = '(Enable option in settings to clear all downloads",default:)(!1)', '$1true'
-                CarouselsonHome  = '(Use carousels on Home",default:)(!1)', '$1true'
-                LeftSidebar      = '(Enable Your Library X view of the left sidebar",default:)(!1)', '$1true'
-                LyricsEnabled    = '(With this enabled, clients will check whether tracks have lyrics available",default:)(!1)', '$1true' 
-                PlaylistCreation = '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1true'
-                SearchBox        = '(Adds a search box so users are able to filter playlists when trying to add songs to a playlist using the contextmenu",default:)(!1)', '$1true'
-                # "Create similar playlist" menu is activated for someone else's playlists
-                SimilarPlaylist  = ',(.\.isOwnedBySelf&&)((\(.{0,11}\)|..createElement)\(.{1,3}Fragment,.+?{(uri:.|spec:.),(uri:.|spec:.).+?contextmenu.create-similar-playlist"\)}\),)' , ',$2$1'
-            }
-            $ofline = Check_verison_clients -param2 "offline"
-            if ($enhance_like_off) { $exp_features.Remove('EnhanceLiked') }
-            if ($enhance_playlist_off) { $exp_features.Remove('EnhancePlaylist') }
-            if ($new_artist_pages_off) { $exp_features.Remove('DisographyArtist') }
-            if ($new_lyrics_off) { $exp_features.Remove('LyricsMatch') }
-            if ($equalizer_off) { $exp_features.Remove('Equalizer') }
-            if (!($device_picker_old)) { $exp_features.Remove('DevicePickerOld') }
-            if ($made_for_you_off -or $ofline -ge "1.1.96.783") { $exp_features.Remove('MadeForYou') }
+            # Experimental Feature
+            $rem = $webjson.exp.psobject.properties 
+            if ($enhance_like_off) { $rem.remove('enhanceliked') }
+            if ($enhance_playlist_off) { $rem.remove('enhanceplaylist') }
+            if ($new_artist_pages_off) { $rem.remove('disographyartist') }
+            if ($new_lyrics_off) { $rem.remove('lyricsmatch') }
+            if ($equalizer_off) { $rem.remove('equalizer') }
+            if (!($device_picker_old)) { $rem.remove('devicepickerold') }
+            if ($made_for_you_off) { $rem.remove('madeforyou') }
             if ($exp_standart) {
-                $exp_features.Remove('EnhanceLiked'), $exp_features.Remove('EnhancePlaylist'), 
-                $exp_features.Remove('DisographyArtist'), $exp_features.Remove('LyricsMatch'), 
-                $exp_features.Remove('Equalizer'), $exp_features.Remove('DevicePicker'), 
-                $exp_features.Remove('NewHome'), $exp_features.Remove('MadeForYou'),
-                $exp_features.Remove('SimilarPlaylist'), $exp_features.Remove('LeftSidebar')
+                $rem.remove('enhanceliked'), $rem.remove('enhanceplaylist'), $rem.remove('disographyartist'), $rem.remove('lyricsmatch'), 
+                $rem.remove('equalizer'), $rem.remove('devicepicker'), $rem.remove('newhome'), $rem.remove('newhome2'), $rem.remove('madeforyou'),
+                $rem.remove('similarplaylist'), $rem.remove('leftsidebar'), $rem.remove('rightsidebar'), $rem.remove('badbunny'), $rem.remove('devicelocal'),
+                $rem.remove('silencetrimmer'), $rem.remove('forgetdevice'), $rem.remove('speedpodcasts') , $rem.remove('showfollows')
             }
-            if (!($left_sidebar_on) -or $ofline -le "1.1.94.872") { $exp_features.Remove('LeftSidebar') }
-            if ($navalt_off) { $exp_features.Remove('NewHome'), $exp_features.Remove('LeftSidebar') }
-            if ($ofline -ge "1.1.94.864") {
-                $exp_features.Remove('LyricsEnabled'), $exp_features.Remove('PlaylistCreation'), 
-                $exp_features.Remove('SearchBox')
-            }
-            if ($ofline -le "1.1.93.896") { $exp_features.Remove('NewHome') }
-            $n = ($lang).NoVariable2
-            $contents = $exp_features
-            $paramdata = $xpui_js
+            if (!($new_theme)) { $rem.remove('newhome'), $rem.remove('newhome2'), $rem.remove('leftsidebar'), $rem.remove('rightsidebar'), $rem.remove('lyricssidebar') }
+
+            $name = "patches.json.exp."
+            $n = "xpui.js"
+            $contents = $webjson.exp.psobject.properties.name
+            $json = $webjson.exp
         }
     }
-    $contents.Keys | Sort-Object | ForEach-Object { 
- 
-        if ($paramdata -match $contents.$PSItem[0]) { 
-            $paramdata = $paramdata -replace $contents.$PSItem[0], $contents.$PSItem[1] 
-        }
-        else { 
-            if (!($paramname -eq "RuTranslate") -or $err_ru) {
+    $paramdata = $xpui
+    $novariable = "Didn't find variable "
+    $offline_patch = $offline -replace '(\d+\.\d+\.\d+)(.\d+)', '$1'
 
-                Write-Host ($lang).NoVariable"" -ForegroundColor red -NoNewline 
-                Write-Host "`$contents.$PSItem"$n
+    $contents | ForEach-Object { 
+
+        if ( $json.$PSItem.version.do ) { $do = $json.$PSItem.version.do -ge $offline_patch } else { $do = $true }
+        if ( $json.$PSItem.version.from ) { $from = $json.$PSItem.version.from -le $offline_patch } else { $from = $false }
+
+        $checkVer = $from -and $do; $translate = $paramname -eq "RuTranslate"
+
+        if ($checkVer -or $translate) {
+
+            if ($json.$PSItem.match.Count -gt 1) {
+
+                $count = $json.$PSItem.match.Count - 1
+                $numbers = 0
+
+                While ($numbers -le $count) {
+
+                    if ($paramdata -match $json.$PSItem.match[$numbers]) { 
+                        $paramdata = $paramdata -replace $json.$PSItem.match[$numbers], $json.$PSItem.replace[$numbers] 
+                    }
+                    else { 
+                        $notlog = "MinJs", "MinJson", "Removertl", "RemovertlCssmin"
+                        if ($paramname -notin $notlog) {
+    
+                            Write-Host $novariable -ForegroundColor red -NoNewline 
+                            Write-Host "$name$PSItem $numbers"'in'$n
+                        }
+                    }  
+                    $numbers++
+                }
             }
-        }    
+            if ($json.$PSItem.match.Count -eq 1) {
+                if ($paramdata -match $json.$PSItem.match) { 
+                    $paramdata = $paramdata -replace $json.$PSItem.match, $json.$PSItem.replace 
+                }
+                else { 
+                    if (!($translate) -or $err_ru) {
+                        Write-Host $novariable -ForegroundColor red -NoNewline 
+                        Write-Host "$name$PSItem"'in'$n
+                    }
+                }
+            }   
+        }
     }
     $paramdata
 }
 
+function extract ($counts, $method, $name, $helper, $add) {
+    switch ( $counts ) {
+        "one" { 
+            if ($method -eq "zip") {
+                Add-Type -Assembly 'System.IO.Compression.FileSystem'
+                $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
+                $zip = [System.IO.Compression.ZipFile]::Open($xpui_spa_patch, 'update')   
+                $file = $zip.GetEntry($name)
+                $reader = New-Object System.IO.StreamReader($file.Open())
+            }
+            if ($method -eq "nonezip") {
+                $file = get-item $env:APPDATA\Spotify\Apps\xpui\$name
+                $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file
+            }
+            $xpui = $reader.ReadToEnd()
+            $reader.Close()
+            if ($helper) { $xpui = Helper -paramname $helper } 
+            if ($method -eq "zip") { $writer = New-Object System.IO.StreamWriter($file.Open()) }
+            if ($method -eq "nonezip") { $writer = New-Object System.IO.StreamWriter -ArgumentList $file }
+            $writer.BaseStream.SetLength(0)
+            $writer.Write($xpui)
+            if ($add) { $add | ForEach-Object { $writer.Write([System.Environment]::NewLine + $PSItem ) } }
+            $writer.Close()  
+            if ($method -eq "zip") { $zip.Dispose() }
+        }
+        "more" {  
+            Add-Type -Assembly 'System.IO.Compression.FileSystem'
+            $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
+            $zip = [System.IO.Compression.ZipFile]::Open($xpui_spa_patch, 'update') 
+            $zip.Entries | Where-Object FullName -like $name | ForEach-Object {
+                $reader = New-Object System.IO.StreamReader($_.Open())
+                $xpui = $reader.ReadToEnd()
+                $reader.Close()
+                $xpui = Helper -paramname $helper 
+                $writer = New-Object System.IO.StreamWriter($_.Open())
+                $writer.BaseStream.SetLength(0)
+                $writer.Write($xpui)
+                $writer.Close()
+            }
+            $zip.Dispose()
+        }
+    }
+}
+
 Write-Host ($lang).ModSpoti`n
 
-# Patching files
+
 if (!($premium) -and $bts) {
-    $patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
+    $patchFiles = "$PWD\dpapi.dll", "$PWD\config.ini"
     Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
+}
+else {
+    $ErrorActionPreference = 'SilentlyContinue' 
+    $test_bts = (Test-Path -Path "$spotifyDirectory\dpapi.dll") -or (Test-Path -Path "$spotifyDirectory\config.ini")
+    if ($test_bts) { Remove-Item "$spotifyDirectory\dpapi.dll", "$spotifyDirectory\config.ini" -Recurse -Force }
 }
 $tempDirectory = $PWD
 Pop-Location
@@ -1222,7 +1162,7 @@ if ($test_spa -and $test_js) {
     Exit
 }
 
-if (Test-Path $xpui_js_patch) {
+if ($test_js) {
     Write-Host ($lang).Spicetify`n
 
     # Delete all files except "en", "ru" and "__longest"
@@ -1278,117 +1218,90 @@ if (Test-Path $xpui_js_patch) {
     Copy-Item $xpui_lic_patch $xpui_lic_bak_patch
     if ($ru) { Copy-Item $xpui_ru_patch $xpui_ru_bak_patch }
 
-    $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $xpui_js_patch
-    $xpui_js = $reader.ReadToEnd()
-    $reader.Close()
     
     # Full screen mode activation and removing "Upgrade to premium" menu, upgrade button, disabling a playlist sponsor
-    if (!($premium)) { $xpui_js = Helper -paramname "OffadsonFullscreen" } 
+    if (!($premium)) { extract -counts 'one' -method 'nonezip' -name 'xpui.js' -helper 'OffadsonFullscreen' }   
 
     # Experimental Feature
-    if (!($exp_spotify)) { $xpui_js = Helper -paramname "ExpFeature" }
+    if (!($exp_spotify)) { extract -counts 'one' -method 'nonezip' -name 'xpui.js' -helper 'ExpFeature' }
 
     # Remove all languages except En and Ru from xpui.js
-    if ($ru) { $xpui_js = Helper -paramname "OffRujs" }
-
-    $writer = New-Object System.IO.StreamWriter -ArgumentList $xpui_js_patch
-    $writer.BaseStream.SetLength(0)
-    $writer.Write($xpui_js)
-    $writer.Write([System.Environment]::NewLine + '// Patched by SpotX') 
-    $writer.Close()  
+    if ($ru) { extract -counts 'one' -method 'nonezip' -name 'xpui.js' -helper 'OffRujs' -add $webjson.others.byspotx.add }
 
     # Russian additional translation
     if ($ru) {
-        $file_ru = get-item $env:APPDATA\Spotify\Apps\xpui\i18n\ru.json
-        $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_ru
-        $xpui_ru = $reader.ReadToEnd()
-        $reader.Close()
-        $xpui_ru = Helper -paramname "RuTranslate"
-        $writer = New-Object System.IO.StreamWriter -ArgumentList $file_ru
-        $writer.BaseStream.SetLength(0)
-        $writer.Write($xpui_ru)
-        $writer.Close()  
+        extract -counts 'one' -method 'nonezip' -name 'i18n\ru.json' -helper 'RuTranslate'
     }
-    $file_desktop_modals = get-item $env:APPDATA\Spotify\Apps\xpui\xpui-desktop-modals.js
-    $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_desktop_modals
-    $xpui_desktop_modals = $reader.ReadToEnd()
-    $reader.Close()
-    $xpui_desktop_modals = Helper -paramname "Discriptions"
-    $writer = New-Object System.IO.StreamWriter -ArgumentList $file_desktop_modals
-    $writer.BaseStream.SetLength(0)
-    $writer.Write($xpui_desktop_modals)
-    $writer.Close()  
+
+    extract -counts 'one' -method 'nonezip' -name 'xpui-desktop-modals.js' -helper 'Discriptions'
+
+    # Hide Collaborators icon
+    if (!($hide_col_icon_off) -and !($exp_spotify)) {
+        extract -counts 'one' -method 'nonezip' -name 'xpui-routes-playlist.js' -helper 'Collaborators'
+    }
 
     # Turn off podcasts
     if ($Podcast_off) { 
-        $file_homev2 = get-item $env:APPDATA\Spotify\Apps\xpui\home-v2.js
-        $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_homev2
-        $xpui_homev2 = $reader.ReadToEnd()
-        $reader.Close()
-        $xpui_homev2 = Helper -paramname "OffPodcasts" 
-        $writer = New-Object System.IO.StreamWriter -ArgumentList $file_homev2
-        $writer.BaseStream.SetLength(0)
-        $writer.Write($xpui_homev2)
-        $writer.Close()  
+        if ($offline -ge "1.1.93.896" -and $offline -le "1.1.97.962") { $js = "home-v2.js" }
+        if ($offline -le "1.1.92.647" -or $offline -ge "1.1.98.683") { $js = "xpui.js" }
+        extract -counts 'one' -method 'nonezip' -name $js -helper 'OffPodcasts'
     }
 
-    # Static color for lyrics
-    if ($lyrics_stat) {
-        $file_lyrics = get-item $env:APPDATA\Spotify\Apps\xpui\xpui-routes-lyrics.css
-        $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_lyrics
-        $xpui_lyrics = $reader.ReadToEnd()
-        $reader.Close()
-        $xpui_lyrics = Helper -paramname "Lyrics-color" 
-        $writer = New-Object System.IO.StreamWriter -ArgumentList $file_lyrics
-        $writer.BaseStream.SetLength(0)
-        $writer.Write($xpui_lyrics)
-        $writer.Close()  
+    # Hiding Ad-like sections from the homepage
+    if ($adsections_off) { 
+        if ($offline -ge "1.1.93.896" -and $offline -le "1.1.97.962") { $js = 'home-v2.js' }
+        if ($offline -ge "1.1.98.683") { $js = 'xpui.js' }
+        extract -counts 'one' -method 'nonezip' -name $js -helper 'OffAdSections'
+    }
+
+    # Accumulation of track listening history with Goofy
+    if ($urlform_goofy -and $idbox_goofy -and $offline -ge "1.1.90.859") { 
+        extract -counts 'one' -method 'nonezip' -name 'xpui.js' -helper 'Goofy-History'
     }
     
-
+    # Static color for lyrics
+    if ($lyrics_stat) {
+        if ($offline -lt "1.1.99.871") { 
+            $name_file = 'xpui-routes-lyrics.css'
+            extract -counts 'one' -method 'nonezip' -name $name_file -helper 'Lyrics-color'
+        }
+        if ($offline -ge "1.1.99.871" -and $offline -le "1.2.2.582") {
+            extract -counts 'one' -method 'nonezip' -name 'xpui.css' -helper 'Fix-New-Lirics'
+            $name_file = 'xpui-routes-lyrics.js' 
+            extract -counts 'one' -method 'nonezip' -name $name_file -helper 'Lyrics-color'  
+        }
+        # mini lyrics
+        if ($offline -ge "1.2.0.1155") {
+            $name_file = 'xpui.js'   
+            extract -counts 'one' -method 'nonezip' -name $name_file -helper 'Lyrics-color'
+        }
+    }
+    
     # xpui.css
-    $file_xpui_css = get-item $env:APPDATA\Spotify\Apps\xpui\xpui.css
-    $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_xpui_css
-    $xpuiContents_xpui_css = $reader.ReadToEnd()
-    $reader.Close()
-
-    $writer = New-Object System.IO.StreamWriter -ArgumentList $file_xpui_css
-    $writer.BaseStream.SetLength(0)
-    $writer.Write($xpuiContents_xpui_css)
-
-
     if (!($premium)) {
         # Hide download icon on different pages
-        $writer.Write([System.Environment]::NewLine + ' .BKsbV2Xl786X9a09XROH{display:none}')
+        $icon = $webjson.others.downloadicon.add
         # Hide submenu item "download"
-        $writer.Write([System.Environment]::NewLine + ' button.wC9sIed7pfp47wZbmU6m.pzkhLqffqF_4hucrVVQA{display:none}')
+        $submenu = $webjson.others.submenudownload.add
         # Hide very high quality streaming
-        $writer.Write([System.Environment]::NewLine + ' #desktop\.settings\.streamingQuality>option:nth-child(5) {display:none}')
+        $very_high = $webjson.others.veryhighstream.add
+
+        $css = $icon, $submenu, $very_high
+        extract -counts 'one' -method 'nonezip' -name 'xpui.css' -add $css
     }
-    # New UI fix
-    if (!($navalt_off)) {
-        $writer.Write([System.Environment]::NewLine + ' .nav-alt .Root__top-container {background: #00000085;gap: 6px;padding: 8px;}')
-        $writer.Write([System.Environment]::NewLine + ' .Root__fixed-top-bar {background-color: #00000000}')
-    }
-    # Hide Collaborators icon
-    if (!($hide_col_icon_off) -and !($exp_spotify)) {
-        $writer.Write([System.Environment]::NewLine + ' .X1lXSiVj0pzhQCUo_72A{display:none}')
-    }
-    $writer.Close()
 
     # licenses.html minification
-    $file_licenses = get-item $env:APPDATA\Spotify\Apps\xpui\licenses.html
-    $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_licenses
-    $xpuiContents_html = $reader.ReadToEnd()
-    $reader.Close()
-    $xpuiContents_html = Helper -paramname "HtmlLicMin" 
-    $writer = New-Object System.IO.StreamWriter -ArgumentList $file_licenses
-    $writer.BaseStream.SetLength(0)
-    $writer.Write($xpuiContents_html)
-    $writer.Close()
+    extract -counts 'one' -method 'nonezip' -name 'licenses.html' -helper 'HtmlLicMin'
 }  
 
-If (Test-Path $xpui_spa_patch) {
+if (!($test_js) -and !($test_spa)) { 
+    Write-Host "xpui.spa not found, reinstall Spotify"
+    Write-Host ($lang).StopScrpit
+    Pause
+    Exit
+}
+
+If ($test_spa) {
 
     $bak_spa = "$env:APPDATA\Spotify\Apps\xpui.bak"
     $test_bak_spa = Test-Path -Path $bak_spa
@@ -1433,235 +1346,129 @@ If (Test-Path $xpui_spa_patch) {
     # Remove all languages except En and Ru from xpui.spa
     if ($ru) {
         [Reflection.Assembly]::LoadWithPartialName('System.IO.Compression') | Out-Null
-
-        $files = 'af.json', 'am.json', 'ar.json', 'ar-EG.json', 'ar-SA.json', 'ar-MA.json', 'az.json', 'bg.json', 'bho.json', 'bn.json', `
-            'bs.json', 'cs.json', 'ca.json', 'gl.json', 'da.json', 'de.json', 'en-GB.json', 'el.json', 'es-419.json', 'es-MX.json', 'es-AR.json', 'es.json', 'et.json', 'fa.json', `
-            'fi.json', 'fil.json', 'fr-CA.json', 'fr.json', 'gu.json', 'he.json', 'hi.json', 'eu.json', 'hu.json', `
-            'id.json', 'is.json', 'it.json', 'ja.json', 'kn.json', 'ko.json', 'lt.json', 'lv.json', `
-            'ml.json', 'mr.json', 'ms.json', 'mk.json', 'nb.json', 'ne.json', 'nl.json', 'or.json', 'pa-IN.json', `
-            'pl.json', 'pt-BR.json', 'pt-PT.json', 'ro.json', 'sk.json', 'sl.json', 'sr.json', 'sv.json', `
-            'sw.json' , 'ta.json', 'te.json', 'th.json', 'tr.json', 'uk.json', 'ur.json', 'vi.json', `
-            'zh-CN.json', 'zh-TW.json', 'zh-HK.json', 'zu.json', 'pa-PK.json', 'hr.json'
-
         $stream = New-Object IO.FileStream($xpui_spa_patch, [IO.FileMode]::Open)
         $mode = [IO.Compression.ZipArchiveMode]::Update
         $zip_xpui = New-Object IO.Compression.ZipArchive($stream, $mode)
 
-    ($zip_xpui.Entries | Where-Object { $files -contains $_.Name }) | ForEach-Object { $_.Delete() }
+    ($zip_xpui.Entries | Where-Object { $_.FullName -match "i18n" -and $_.FullName -inotmatch "(ru|en.json|longest)" }) | ForEach-Object { $_.Delete() }
 
         $zip_xpui.Dispose()
         $stream.Close()
         $stream.Dispose()
     }
 
-    Add-Type -Assembly 'System.IO.Compression.FileSystem'
-    $zip = [System.IO.Compression.ZipFile]::Open($xpui_spa_patch, 'update')
-    
-    # xpui.js
-    $entry_xpui = $zip.GetEntry('xpui.js')
-    $reader = New-Object System.IO.StreamReader($entry_xpui.Open())
-    $xpui_js = $reader.ReadToEnd()
-    $reader.Close()
-    
+    # Full screen mode activation and removing "Upgrade to premium" menu, upgrade button, disabling a playlist sponsor
     if (!($premium)) {
-        # Full screen mode activation and removing "Upgrade to premium" menu, upgrade button, disabling a playlist sponsor
-        $xpui_js = Helper -paramname "OffadsonFullscreen"
+        extract -counts 'one' -method 'zip' -name 'xpui.js' -helper 'OffadsonFullscreen'
     }
-
+    
     # Experimental Feature
-    if (!($exp_spotify)) { $xpui_js = Helper -paramname "ExpFeature" }
+    if (!($exp_spotify)) { extract -counts 'one' -method 'zip' -name 'xpui.js' -helper 'ExpFeature' }
 
     # Remove all languages except En and Ru from xpui.js
-    if ($ru) { $xpui_js = Helper -paramname "OffRujs" }
+    if ($ru) { extract -counts 'one' -method 'zip' -name 'xpui.js' -helper 'OffRujs' }
 
     # Disabled logging
-    $xpui_js = $xpui_js -replace "sp://logging/v3/\w+", ""
-   
-    $writer = New-Object System.IO.StreamWriter($entry_xpui.Open())
-    $writer.BaseStream.SetLength(0)
-    $writer.Write($xpui_js)
-    $writer.Write([System.Environment]::NewLine + '// Patched by SpotX') 
-    $writer.Close()
-
+    extract -counts 'one' -method 'zip' -name 'xpui.js' -helper 'DisabledLog' -add $webjson.others.byspotx.add
 
     # Turn off podcasts
     if ($podcast_off) { 
-        $entry_home_v2 = $zip.GetEntry('home-v2.js')
-        $reader = New-Object System.IO.StreamReader($entry_home_v2.Open())
-        $xpui_homev2 = $reader.ReadToEnd()
-        $reader.Close()
-        $xpui_homev2 = Helper -paramname "OffPodcasts" 
-        $writer = New-Object System.IO.StreamWriter($entry_home_v2.Open())
-        $writer.BaseStream.SetLength(0)
-        $writer.Write($xpui_homev2)
-        $writer.Close()
+        if ($offline -ge "1.1.93.896" -and $offline -le "1.1.97.962") { $js = 'home-v2.js' }
+        if ($offline -le "1.1.92.647" -or $offline -ge "1.1.98.683") { $js = 'xpui.js' }
+        extract -counts 'one' -method 'zip' -name $js -helper 'OffPodcasts'
     }
+
+    # Hiding Ad-like sections from the homepage
+    if ($adsections_off) { 
+        if ($offline -ge "1.1.93.896" -and $offline -le "1.1.97.962") { $js = 'home-v2.js' }
+        if ($offline -ge "1.1.98.683") { $js = 'xpui.js' }
+        extract -counts 'one' -method 'zip' -name $js -helper 'OffAdSections'
+    }
+
+    # Accumulation of track listening history with Goofy
+    if ($urlform_goofy -and $idbox_goofy -and $offline -ge "1.1.90.859") { 
+        extract -counts 'one' -method 'zip' -name 'xpui.js' -helper 'Goofy-History'
+    }
+
+    # Hide Collaborators icon
+    if (!($hide_col_icon_off) -and !($exp_spotify)) {
+        extract -counts 'one' -method 'zip' -name 'xpui-routes-playlist.js' -helper 'Collaborators'
+    }
+
 
     # Static color for lyrics
     if ($lyrics_stat) {
-        $entry_lyrics = $zip.GetEntry('xpui-routes-lyrics.css')
-        $reader = New-Object System.IO.StreamReader($entry_lyrics.Open())
-        $xpui_lyrics = $reader.ReadToEnd()
-        $reader.Close()
-        $xpui_lyrics = Helper -paramname "Lyrics-color" 
-        $writer = New-Object System.IO.StreamWriter($entry_lyrics.Open())
-        $writer.BaseStream.SetLength(0)
-        $writer.Write($xpui_lyrics)
-        $writer.Close()
+        # old
+        if ($offline -lt "1.1.99.871") { 
+            $name_file = 'xpui-routes-lyrics.css'
+            extract -counts 'one' -method 'zip' -name $name_file -helper 'Lyrics-color'
+        }
+        # new 
+        if ($offline -ge "1.1.99.871" -and $offline -le "1.2.2.582") {
+            extract -counts 'one' -method 'zip' -name 'xpui.css' -helper 'Fix-New-Lirics'
+            $name_file = 'xpui-routes-lyrics.js'   
+            extract -counts 'one' -method 'zip' -name $name_file -helper 'Lyrics-color'
+        }
+        # mini lyrics
+        if ($offline -ge "1.2.0.1155") {
+            $name_file = 'xpui.js'   
+            extract -counts 'one' -method 'zip' -name $name_file -helper 'Lyrics-color'
+        }
     }
 
     # Add discriptions (xpui-desktop-modals.js)
-    $entry_xpui_desktop_modals = $zip.GetEntry('xpui-desktop-modals.js')
-    $reader = New-Object System.IO.StreamReader($entry_xpui_desktop_modals.Open())
-    $xpui_desktop_modals = $reader.ReadToEnd()
-    $reader.Close()
-    $xpui_desktop_modals = Helper -paramname "Discriptions"
-    $writer = New-Object System.IO.StreamWriter($entry_xpui_desktop_modals.Open())
-    $writer.BaseStream.SetLength(0)
-    $writer.Write($xpui_desktop_modals)
-    $writer.Close()
+    extract -counts 'one' -method 'zip' -name 'xpui-desktop-modals.js' -helper 'Discriptions'
 
     # Disable Sentry (vendor~xpui.js)
-    $entry_vendor_xpui = $zip.GetEntry('vendor~xpui.js')
-    $reader = New-Object System.IO.StreamReader($entry_vendor_xpui.Open())
-    $xpuiContents_vendor = $reader.ReadToEnd()
-    $reader.Close()
-
-    $xpuiContents_vendor = $xpuiContents_vendor `
-        -replace "(?:prototype\.)?bindClient(?:=function)?\(\w+\)\{", '${0}return;'
-    $writer = New-Object System.IO.StreamWriter($entry_vendor_xpui.Open())
-    $writer.BaseStream.SetLength(0)
-    $writer.Write($xpuiContents_vendor)
-    $writer.Close()
+    extract -counts 'one' -method 'zip' -name 'vendor~xpui.js' -helper 'DisableSentry'
 
     # Minification of all *.js
-    $zip.Entries | Where-Object FullName -like '*.js' | ForEach-Object {
-        $readerjs = New-Object System.IO.StreamReader($_.Open())
-        $xpuiContents_js = $readerjs.ReadToEnd()
-        $readerjs.Close()
-
-        $xpuiContents_js = $xpuiContents_js `
-            -replace "[/][/][#] sourceMappingURL=.*[.]map", "" -replace "\r?\n(?!\(1|\d)", ""
-
-        $writer = New-Object System.IO.StreamWriter($_.Open())
-        $writer.BaseStream.SetLength(0)
-        $writer.Write($xpuiContents_js)
-        $writer.Close()
-    }
+    extract -counts 'more' -name '*.js' -helper 'MinJs'
 
     # xpui.css
-    $entry_xpui_css = $zip.GetEntry('xpui.css')
-    $reader = New-Object System.IO.StreamReader($entry_xpui_css.Open())
-    $xpuiContents_xpui_css = $reader.ReadToEnd()
-    $reader.Close()
-    
-    $writer = New-Object System.IO.StreamWriter($entry_xpui_css.Open())
-    $writer.BaseStream.SetLength(0)
-    $writer.Write($xpuiContents_xpui_css)
+    if ($new_theme -or !($premium)) {
     if (!($premium)) {
         # Hide download icon on different pages
-        $writer.Write([System.Environment]::NewLine + ' .BKsbV2Xl786X9a09XROH {display:none}')
+        $icon = $webjson.others.downloadicon.add
         # Hide submenu item "download"
-        $writer.Write([System.Environment]::NewLine + ' button.wC9sIed7pfp47wZbmU6m.pzkhLqffqF_4hucrVVQA {display:none}')
+        $submenu = $webjson.others.submenudownload.add
         # Hide very high quality streaming
-        $writer.Write([System.Environment]::NewLine + ' #desktop\.settings\.streamingQuality>option:nth-child(5) {display:none}')
+        $very_high = $webjson.others.veryhighstream.add
     }
-     
+
     # New UI fix
-    if (!($navalt_off)) {
-        $writer.Write([System.Environment]::NewLine + ' .nav-alt .Root__top-container {background: #00000085;gap: 6px;padding: 8px;}')
-        $writer.Write([System.Environment]::NewLine + ' .Root__fixed-top-bar {background-color: #00000000}')
+    if ($new_theme) {
+        if ($offline -ge "1.1.94.864" -and $offline -lt "1.2.3.1107") {
+            $navaltfix = $webjson.others.navaltfix.add[0]
+        }
+        if ($offline -ge "1.2.3.1107") {
+            $navaltfix = $webjson.others.navaltfix.add[1]
+        }
+        $navaltfix2 = $webjson.others.navaltfix.add[2]
     }
-    # Hide Collaborators icon
-    if (!($hide_col_icon_off) -and !($exp_spotify)) {
-        $writer.Write([System.Environment]::NewLine + ' .X1lXSiVj0pzhQCUo_72A{display:none}')
-    }
-    $writer.Close()
 
-    # of all *.Css
-    $zip.Entries | Where-Object FullName -like '*.css' | ForEach-Object {
-        $readercss = New-Object System.IO.StreamReader($_.Open())
-        $xpuiContents_css = $readercss.ReadToEnd()
-        $readercss.Close()
-
-        $xpuiContents_css = $xpuiContents_css `
-            <# Remove RTL #>`
-            -replace "}\[dir=ltr\]\s?([.a-zA-Z\d[_]+?,\[dir=ltr\])", '}[dir=str] $1' -replace "}\[dir=ltr\]\s?", "} " -replace "html\[dir=ltr\]", "html" `
-            -replace ",\s?\[dir=rtl\].+?(\{.+?\})", '$1' -replace "[\w\-\.]+\[dir=rtl\].+?\{.+?\}", "" -replace "\}\[lang=ar\].+?\{.+?\}", "}" `
-            -replace "\}\[dir=rtl\].+?\{.+?\}", "}" -replace "\}html\[dir=rtl\].+?\{.+?\}", "}" -replace "\}html\[lang=ar\].+?\{.+?\}", "}" `
-            -replace "\[lang=ar\].+?\{.+?\}", "" -replace "html\[dir=rtl\].+?\{.+?\}", "" -replace "html\[lang=ar\].+?\{.+?\}", "" `
-            -replace "\[dir=rtl\].+?\{.+?\}", "" -replace "\[dir=str\]", "[dir=ltr]" `
-            <# Css minification #>`
-            -replace "[/]\*([^*]|[\r\n]|(\*([^/]|[\r\n])))*\*[/]", "" -replace "[/][/]#\s.*", "" -replace "\r?\n(?!\(1|\d)", ""
+    $css = $icon, $submenu, $very_high, $navaltfix, $navaltfix2
+    extract -counts 'one' -method 'zip' -name 'xpui.css' -add $css
+}
     
-        $writer = New-Object System.IO.StreamWriter($_.Open())
-        $writer.BaseStream.SetLength(0)
-        $writer.Write($xpuiContents_css)
-        $writer.Close()
-    }
+    # Old UI fix
+    extract -counts 'one' -method 'zip' -name 'xpui.css' -helper "FixOldTheme"
+
+    # Remove RTL and minification of all *.css
+    extract -counts 'more' -name '*.css' -helper 'RemovertlCssmin'
     
     # licenses.html minification
-    $zip.Entries | Where-Object FullName -like '*licenses.html' | ForEach-Object {
-        $reader = New-Object System.IO.StreamReader($_.Open())
-        $xpuiContents_html = $reader.ReadToEnd()
-        $reader.Close()      
-        $xpuiContents_html = Helper -paramname "HtmlLicMin"
-        $writer = New-Object System.IO.StreamWriter($_.Open())
-        $writer.BaseStream.SetLength(0)
-        $writer.Write($xpuiContents_html)
-        $writer.Close()
-    }
+    extract -counts 'one' -method 'zip' -name 'licenses.html' -helper 'HtmlLicMin'
 
     # blank.html minification
-    $entry_blank_html = $zip.GetEntry('blank.html')
-    $reader = New-Object System.IO.StreamReader($entry_blank_html.Open())
-    $xpuiContents_html_blank = $reader.ReadToEnd()
-    $reader.Close()
-
-    $html_min1 = "  "
-    $html_min2 = "(?m)(^\s*\r?\n)"
-    $html_min3 = "\r?\n(?!\(1|\d)"
-    if ($xpuiContents_html_blank -match $html_min1) { $xpuiContents_html_blank = $xpuiContents_html_blank -replace $html_min1, "" } else { Write-Host ($lang).NoVariable"" -ForegroundColor red -NoNewline; Write-Host "`$html_min1 "($lang).NoVariable4 }
-    if ($xpuiContents_html_blank -match $html_min2) { $xpuiContents_html_blank = $xpuiContents_html_blank -replace $html_min2, "" } else { Write-Host ($lang).NoVariable"" -ForegroundColor red -NoNewline; Write-Host "`$html_min2 "($lang).NoVariable4 }
-    if ($xpuiContents_html_blank -match $html_min3) { $xpuiContents_html_blank = $xpuiContents_html_blank -replace $html_min3, "" } else { Write-Host ($lang).NoVariable"" -ForegroundColor red -NoNewline; Write-Host "`$html_min3 "($lang).NoVariable4 }
-
-    $xpuiContents_html_blank = $xpuiContents_html_blank
-    $writer = New-Object System.IO.StreamWriter($entry_blank_html.Open())
-    $writer.BaseStream.SetLength(0)
-    $writer.Write($xpuiContents_html_blank)
-    $writer.Close()
+    extract -counts 'one' -method 'zip' -name 'blank.html' -helper 'HtmlBlank'
     
     if ($ru) {
         # Additional translation of the ru.json file
-        $zip.Entries | Where-Object FullName -like '*ru.json' | ForEach-Object {
-            $readerjson = New-Object System.IO.StreamReader($_.Open())
-            $xpui_ru = $readerjson.ReadToEnd()
-            $readerjson.Close()
-
-    
-            $xpui_ru = Helper -paramname "RuTranslate"
-            $writer = New-Object System.IO.StreamWriter($_.Open())
-            $writer.BaseStream.SetLength(0)
-            $writer.Write($xpui_ru)
-            $writer.Close()
-        }
+        extract -counts 'more' -name '*ru.json' -helper 'RuTranslate'
     }
-    # Json
-    $zip.Entries | Where-Object FullName -like '*.json' | ForEach-Object {
-        $readerjson = New-Object System.IO.StreamReader($_.Open())
-        $xpuiContents_json = $readerjson.ReadToEnd()
-        $readerjson.Close()
-
-        # json minification
-        $xpuiContents_json = $xpuiContents_json `
-            -replace "  ", "" -replace "    ", "" -replace '": ', '":' -replace "\r?\n(?!\(1|\d)", "" 
-
-        $writer = New-Object System.IO.StreamWriter($_.Open())
-        $writer.BaseStream.SetLength(0)
-        $writer.Write($xpuiContents_json)
-        $writer.Close()       
-    }
-    $zip.Dispose()   
+    # Minification of all *.json
+    extract -counts 'more' -name '*.json' -helper 'MinJson'
 }
 
 # Delete all files except "en" and "ru"
